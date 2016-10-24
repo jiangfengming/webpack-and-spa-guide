@@ -27,8 +27,9 @@
 图片轮播等等. 但如果一个页面内不能向服务器请求数据, 能做的事情毕竟有限的, 代码的量也能维持在页面交互逻辑范围内.
 这时候很多人开始突破一个页面能做的事情的范围, 使用隐藏的iframe和flash等作为和服务器通信的桥梁,
 新世界的大门慢慢地被打开, 在一个页面内和服务器进行数据交互, 意味着以前需要跳转多个页面的事情现在可以用一个页面搞定.
-但由于iframe和flash技术过于tricky和复杂, 并没能得到广泛的推广. 直到Google推出Gmail的时候,
-人们意识到了一个被忽略的接口, [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest),
+但由于iframe和flash技术过于tricky和复杂, 并没能得到广泛的推广.
+
+直到Google推出Gmail的时候(2004年), 人们意识到了一个被忽略的接口, [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest),
 也就是我们俗称的AJAX, 这是一个使用方便的, 兼容性良好的服务器通信接口. 从此开始,
 我们的页面开始玩出各种花来了, 前端一下子出现了各种各样的库, [Prototype](http://prototypejs.org/), [Dojo](https://dojotoolkit.org/), [MooTools](http://mootools.net/), [Ext JS](https://www.sencha.com/products/extjs/), [jQuery](https://jquery.com/)... 我们开始往页面里引用各种库和插件, 我们的js文件也就爆炸了...
 
@@ -39,10 +40,35 @@ mac/linux上搞个bash脚本, 哪几个文件要合并在一块的, 哪几个要
 
 基于合并压缩技术, 项目越做越大, 问题也越来越多, 大概就是以下这些问题:
 * 库和插件为了要给他人调用, 肯定要找个地方注册, 一般就是在window下申明一个全局的函数或对象.
-  难保哪天用的两个库在全局用同样的名字, 那就冲突了. jQuery倒还好, 它有自己的插件注册机制,
-  并不是在全局作用域里.
+  难保哪天用的两个库在全局用同样的名字, 那就冲突了.
 * 库和插件如果还依赖其他的库和插件, 就要告知使用人, 需要先引哪些依赖库, 那些依赖库也有自己的依赖库的话,
   就要先引依赖库的依赖库, 以此类推...
+
+恰好就在这个时候(2009年), 随着后端JavaScript技术的发展, 人们提出了[CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1.1)
+的模块化规范, 大概的语法是: 如果`a.js`依赖`b.js`和`c.js`, 那么就在`a.js`的头部, 引入这些依赖文件:
+```js
+var b = require('./b.js');
+var c = require('./c.js');
+```
+那么变量`b`和`c`会是什么呢? 那就是`b.js`和`c.js`导出的东西, 比如`b.js`可以这样导出:
+```js
+exports.square = function(num) {
+  return num * num;
+};
+```
+然后就可以在`a.js`使用这个`square`方法:
+```js
+var n = b.square(2);
+```
+如果`c.js`想导出`Number`, 那么可以这样写:
+```js
+module.exports = 3.14159;
+```
+那么`a.js`中的变量`c`就是数字`3.14159`;
+具体的语法规范可以查看Node.js的[文档](https://nodejs.org/dist/latest-v6.x/docs/api/modules.html).
+
+
+但是CommonJS
 
 于是呢, 就有人弄了个[AMD](http://requirejs.org/)模块方案解决了这个事情.
 
