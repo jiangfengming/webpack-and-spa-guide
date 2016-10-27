@@ -72,7 +72,7 @@ module.exports = d.PI; // 假设d.PI的值是3.14159
 
 
 但是CommonJS在浏览器内并不适用. 因为`require()`的返回是同步的, 意味着有多个依赖的话需要一个一个依次下载,
-堵塞了js脚本的执行. 所以人们就在CommonJS的基础上定义了[Asynchronous Module Definition (AMD)](https://github.com/amdjs/amdjs-api)规范, 使用了异步回调的语法来并行下载多个依赖项,
+堵塞了js脚本的执行. 所以人们就在CommonJS的基础上定义了[Asynchronous Module Definition (AMD)](https://github.com/amdjs/amdjs-api)规范(2011年), 使用了异步回调的语法来并行下载多个依赖项,
 比如作为入口的`a.js`可以这样写:
 ```js
 require(['./b', './c'], function(b, c) {
@@ -100,23 +100,25 @@ js模块化问题基本解决了, css和html也没闲着. 什么[less](http://le
 什么[handlebars](http://handlebarsjs.com/), [ejs](http://www.embeddedjs.com/),
 [jade](http://jade-lang.com/), 可以把ajax拿到的数据插入到模板中, 然后用innerHTML显示到页面上.
 
-托AMD和CSS预处理和模板语言的福, 我们的编译脚本也洋洋洒洒写了百来行, 又一个新需求就这样产生了:
-我们需要一个简单的脚本文件, 可以利用各种编译工具, 编译/压缩js, css, html, 图片等资源.
-然后[Grunt](http://gruntjs.com/)产生了, 配置文件格式是我们最爱的js, 比shell脚本熟悉很多,
-写法也很简单, 社区有非常多的插件支持各种编译, lint, 测试工具. 一年多后另一个打包工具[gulp](http://gulpjs.com/)
-诞生了, 扩展性更强, 采用流式处理效率更高.
+托AMD和CSS预处理和模板语言的福, 我们的编译脚本也洋洋洒洒写了百来行. 命令行脚本有个不好的地方,
+就是windows和mac/linux是不通用的, 如果有跨平台需求的话, windows要装个可以执行bash脚本的命令行工具,
+比如msys(目前最新的是[msys2](http://msys2.github.io/)), 或者使用php或python等其他语言的脚本来编写,
+对于非全栈型的前端程序员来说, 写bash/php/python还是很生涩的. 因此我们需要一个简单的打包工具,
+可以利用各种编译工具, 编译/压缩js, css, html, 图片等资源. 然后[Grunt](http://gruntjs.com/)产生了(2012年),
+配置文件格式是我们最爱的js, 写法也很简单, 社区有非常多的插件支持各种编译, lint, 测试工具.
+一年多后另一个打包工具[gulp](http://gulpjs.com/)诞生了, 扩展性更强, 采用流式处理效率更高.
 
-依托AMD模块化编程, SPA(Single-page application)的概念顺其自然的出现了, 一个网页不再是传统的类似word文档的页面,
+依托AMD模块化编程, SPA(Single-page application)的实现方式更为简单清晰, 一个网页不再是传统的类似word文档的页面,
 而是一个完整的应用程序. SPA应用有一个总的入口页面, 我们通常把它命名为`index.html`,
 `app.html`, `main.html`, 这个html的`<body>`一般是空的, 或者只有总的布局(layout), 比如下图:
 
 ![layout](layout.png)
 
 布局会把header, nav, footer的内容填上, 但main区域是个空的容器. 这个作为入口的html最主要的工作是加载启动SPA的js文件,
-然后由js驱动, 加载对应的AMD模块, 然后该AMD模块执行, 渲染对应的html到页面指定的容器内(比如图中的main).
-在点击链接等交互时, 页面不会跳转, 而是加载对应的AMD模块, 然后该AMD模块渲染对应的html到容器内.
+然后由js驱动, 根据当前浏览器地址进行路由分发, 加载对应的AMD模块, 然后该AMD模块执行, 渲染对应的html到页面指定的容器内(比如图中的main).
+在点击链接等交互时, 页面不会跳转, 而是由js路由加载对应的AMD模块, 然后该AMD模块渲染对应的html到容器内.
 
-虽然AMD模块让SPA得以实现, 但小问题还是很多的:
+虽然AMD模块让SPA更容易地实现, 但小问题还是很多的:
 * 不是所有的第三方库都是AMD规范的, 这时候要配置`shim`, 很麻烦.
 * 虽然RequireJS支持插件的形式通过把html作为依赖加载, 但html里面的`<img>`的路径是个问题,
   需要使用绝对路径并且保持打包后的图片路径和打包前的路径不变, 或者使用html模板语言把`src`写成变量,
@@ -194,30 +196,44 @@ npm install webpack-dev-server@2.1.0-beta.9 --save-dev
 ```sh
 npm install babel-core babel-preset-es2015 babel-loader --save-dev
 ```
-这里`babel-core`是核心库, 它实现了转换功能. `babel-preset-es2015`是一个配置文件, 意思是转换ES2015也就是ES6语法,
-babel还有[其他配置文件](http://babeljs.io/docs/plugins/), 比如转ES2016什么的, 现在用不着, 这里就不多说了.
-但是光安装了`babel-preset-es2015`在打包时是不会生效的, 需要在项目中建一个文件`.babelrc`, 内容:
+`npm install`可以一次安装多个模块, 模块间用空格隔开. 这里`babel-core`顾名思义是babel的核心编译器.
+`babel-preset-es2015`是一个配置文件, 意思是转换ES2015也就是ES6语法,
+babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 比如, 如果要使用ES2016和ES2017语法,
+可以安装`babel-preset-latest`:
+```sh
+npm install babel-preset-latest --save-dev
 ```
+但是光安装了`babel-preset-es2015`在打包时是不会生效的, 需要在项目中建一个文件`.babelrc`, 内容:
+```json
 {
-  "presets": ["es2015"]
+  "presets": ["es2015", { "modules": false }]
 }
 ```
-打包时babel会读取这个文件, 找到需要的配置, 然后执行相应的代码转换.
+打包时babel会读取这个文件, 找到需要的配置, 然后执行相应的转换. 如果使用`babel-preset-latest`,
+这里相应的也要修改为:
+```json
+{
+  "presets": ["latest", { "modules": false }]
+}
+```
+这里的`"modules": false`配置是禁止babel转ES6模块语法到CommonJS语法, 因为webpack 2支持ES6模块.
 
 `babel-loader`是webpack的插件, 等会用到时再说.
 
-
+然后, 我们安装[eslint](http://eslint.org/), 用来检查语法报错, 当我们书写js时, 有错误的地方会出现提示.
+```sh
+npm install eslint eslint-config-enough --save-dev
+```
 
 
 接下来我们进到[examples/simple](examples/simple)目录, 先来看一下目录结构:
 ```
-├── dist                      打包后只需部署这个文件夹到生产环境
-│   ├── assets                打包输出目录
-│   └── index.html            入口页面
+├── dist                      打包输出目录, 只需部署这个目录到生产环境
 ├── package.json              项目配置信息
 ├── node_modules              npm安装的依赖包都在这里面
 ├── src                       我们的源代码
 │   ├── components            可以复用的模块放在这里面
+│   ├── index.html            入口html
 │   ├── index.js              入口js
 │   ├── libs                  不在npm和git上的库扔这里
 │   └── views                 页面放这里
