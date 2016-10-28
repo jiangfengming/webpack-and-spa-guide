@@ -191,32 +191,42 @@ npm install webpack-dev-server@2.1.0-beta.9 --save-dev
 这是webpack提供的用来开发调试的服务器, 让你可以在`http://127.0.0.1:8080/`这样的url打开页面来调试,
 有了它就不用配置nginx了, 方便很多.
 
-接下来, 为了能用上[ES6](http://es6.ruanyifeng.com/), 我们来装一个[babel](http://babeljs.io/),
+接下来, 为了能用上[ES6 (ES2015)](http://es6.ruanyifeng.com/), 我们来装一个[babel](http://babeljs.io/),
 它用来把我们写的ES6语法转化成ES5, 这样我们源代码写ES6, 打包时生成ES5, 让不支持ES6的浏览器(比如IE)也能照常运行脚本
 ```sh
-npm install babel-core babel-preset-es2015 babel-loader --save-dev
+npm install babel-core babel-preset-latest babel-loader --save-dev
 ```
 `npm install`可以一次安装多个模块, 模块间用空格隔开. 这里`babel-core`顾名思义是babel的核心编译器.
-`babel-preset-es2015`是一个配置文件, 意思是转换ES2015也就是ES6语法,
-babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 比如, 如果要使用ES2016和ES2017语法,
-可以安装`babel-preset-latest`:
+`babel-preset-latest`是一个配置文件, 意思是转换ES2015/ES2016/ES2017到ES5, 是的, 不只ES6哦.
+babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装`babel-preset-es2015`:
 ```sh
-npm install babel-preset-latest --save-dev
+npm install babel-preset-es2015 --save-dev
 ```
-但是光安装了`babel-preset-es2015`在打包时是不会生效的, 需要在项目中建一个文件`.babelrc`, 内容:
+但是光安装了`babel-preset-latest`, 在打包时是不会生效的, 需要在`package.json`加入这些内容:
 ```json
 {
-  "presets": ["es2015", { "modules": false }]
+  "name": "simple",
+  "version": "1.0.0",
+
+  "babel": {
+    "presets": ["latest", { "modules": false }]
+  }
 }
 ```
-打包时babel会读取这个文件, 找到需要的配置, 然后执行相应的转换. 如果使用`babel-preset-latest`,
-这里相应的也要修改为:
-```json
-{
-  "presets": ["latest", { "modules": false }]
-}
-```
+打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.
 这里的`"modules": false`配置是禁止babel转ES6模块语法到CommonJS语法, 因为webpack 2支持ES6模块.
+
+如果使用`babel-preset-es2015`, 这里相应的也要修改为:
+```json
+{
+  "name": "simple",
+  "version": "1.0.0",
+
+  "babel": {
+    "presets": ["es2015", { "modules": false }]
+  }
+}
+```
 
 `babel-loader`是webpack的插件, 等会用到时再说.
 
@@ -224,7 +234,29 @@ npm install babel-preset-latest --save-dev
 ```sh
 npm install eslint eslint-config-enough --save-dev
 ```
+这里`eslint-config-enough`是配置文件, 它规定了代码规范, 要使它生效, 我们同样要在`package.json`中添加内容:
+```json
+{
+  "name": "simple",
+  "version": "1.0.0",
 
+  "eslintConfig": {
+    "extends": "enough",
+    "env": {
+      "browser": true,
+      "commonjs": true
+    }
+  }
+}
+
+```
+业界最有名的语法规范是[airbnb](https://github.com/airbnb/javascript)出品的, 但它规定的太死板了,
+比如不允许使用`for-of`和`for-in`等. 感兴趣的同学可以参照[这里](https://www.npmjs.com/package/eslint-config-airbnb)安装使用.
+
+项目里安装了eslint还没用, 我们的IDE和编辑器也得要装eslint插件支持它. [atom](https://atom.io/)需要安装[linter](https://atom.io/packages/linter)和[linter-eslint](https://atom.io/packages/linter-eslint)这两个插件,
+装好后重启生效. [WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
+
+![WebStorm ESLint Config](webstorm-eslint-config.png)
 
 接下来我们进到[examples/simple](examples/simple)目录, 先来看一下目录结构:
 ```
