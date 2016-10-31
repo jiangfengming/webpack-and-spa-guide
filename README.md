@@ -1,4 +1,4 @@
-# Webpack打包实战
+# webpack打包实战
 
 ## 写在开头
 先说说为什么要写这篇文章, 最初的原因是组里的小朋友们看了[webpack](http://webpack.github.io/)文档后,
@@ -138,11 +138,11 @@ js模块化问题基本解决了, css和html也没闲着. 什么[less](http://le
   code review时想知道一个文件是哪个模块的也很麻烦, 解决办法比如又要在imgs目录下建立按模块命名的文件夹,
   里面再放图片.
 
-到了这里, 我们的主角Webpack登场了(2012年)(此处应有掌声).
+到了这里, 我们的主角webpack登场了(2012年)(此处应有掌声).
 
 ![webpack](what-is-webpack.png)
 
-和Webpack差不多同期登场的还有[Browserify](http://browserify.org/). 这里简单介绍一下Browserify,
+和webpack差不多同期登场的还有[Browserify](http://browserify.org/). 这里简单介绍一下Browserify,
 Browserify的目的是让前端也能用CommonJS的语法`require('module')`来加载js. 它会从入口js文件开始,
 把所有的`require()`调用的文件打包合并到一个文件, 这样就解决了异步加载的问题.
 那么Browserify有什么不足之处导致我不推荐使用它呢? 主要原因有下面几点:
@@ -163,19 +163,84 @@ Browserify的目的是让前端也能用CommonJS的语法`require('module')`来�
 ### 安装Node.js
 webpack是基于我大Node.js的打包工具, 上来第一件事自然是先安装Node.js了, [传送门->](https://nodejs.org/).
 
-### 把架子搭起来
-我们先随便找个地方, 建一个文件夹叫`simple`, 然后在这里面搭项目.
-打开命令行窗口, `cd`到`simple`目录, 然后执行这个命令初始化项目:
+### 初始化一个项目
+我们先随便找个地方, 建一个文件夹叫`simple`, 然后在这里面搭项目. 完成品在[examples/simple](examples/simple)目录,
+大家搞的时候可以参照一下. 我们先看一下目录结构:
+```
+├── dist                      打包输出目录, 只需部署这个目录到生产环境
+├── package.json              项目配置信息
+├── node_modules              npm安装的依赖包都在这里面
+├── src                       我们的源代码
+│   ├── components            可以复用的模块放在这里面
+│   ├── index.html            入口html
+│   ├── index.js              入口js
+│   ├── libs                  不在npm和git上的库扔这里
+│   └── views                 页面放这里
+└── webpack.config.babel.js   webpack配置文件
+```
+
+打开命令行窗口, `cd`到刚才建的`simple`目录. 然后执行这个命令初始化项目:
 ```sh
 npm init
 ```
 命令行会要你输入一些配置信息, 我们这里一路按回车下去, 生成一个默认的项目配置文件`package.json`.
 
-然后, 我们把webpack安装进项目里:
+### 给项目加上语法报错和代码规范检查
+我们安装[eslint](http://eslint.org/), 用来检查语法报错, 当我们书写js时, 有错误的地方会出现提示.
 ```sh
-npm install webpack@2.1.0-beta.25 --save-dev
+npm install eslint eslint-config-enough --save-dev
 ```
-这样, webpack就被装进了`node_modules`目录中. 这里, 我们用`@2.1.0-beta.25`指定了webpack版本号,
+`npm install`可以一条命令同时安装多个包, 包之间用空格分隔. 包会被安装进`node_modules`目录中.
+
+这里`eslint-config-enough`是配置文件, 它规定了代码规范, 要使它生效, 我们要在`package.json`中添加内容:
+```json
+{
+  "name": "simple",
+  "version": "1.0.0",
+
+  "eslintConfig": {
+    "extends": "enough",
+    "env": {
+      "browser": true,
+      "commonjs": true
+    }
+  }
+}
+
+```
+业界最有名的语法规范是[airbnb](https://github.com/airbnb/javascript)出品的, 但它规定的太死板了,
+比如不允许使用`for-of`和`for-in`等. 感兴趣的同学可以参照[这里](https://www.npmjs.com/package/eslint-config-airbnb)安装使用.
+
+项目里安装了eslint还没用, 我们的IDE和编辑器也得要装eslint插件支持它. [atom](https://atom.io/)需要安装[linter](https://atom.io/packages/linter)和[linter-eslint](https://atom.io/packages/linter-eslint)这两个插件,
+装好后重启生效. [WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
+
+![WebStorm ESLint Config](webstorm-eslint-config.png)
+
+### 写几个页面
+我们写一个最简单的SPA应用来介绍SPA应用的内部工作原理.
+首先, 建立`src/index.html`文件, 内容如下:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <meta name="format-detection" content="telephone=no">
+  </head>
+
+  <body>
+  </body>
+</html>
+```
+它是一个空白页面, layout和
+
+
+### 安装webpack和Babel
+然后, 我们把webpack和它的插件安装到项目:
+```sh
+npm install webpack@2.1.0-beta.25 webpack-dev-server@2.1.0-beta.9 html-webpack-plugin --save-dev
+```
+这里, 我们用`@2.1.0-beta.25`指定了webpack版本号,
 因为2还在beta, 不指定的话默认会装1. 因为2基本没问题了, 所以就没必要教大家用1了.
 那么怎么知道最新的beta版本是哪个呢? 执行下面命令查看:
 ```sh
@@ -183,21 +248,19 @@ npm show webpack versions --json
 ```
 最后一个就是了.
 
-`--save-dev`会把webpack记录到`package.json`中的`devDependencies`对象中,
-这什么意思, 我们等会用到再说. 然后我们继续装`webpack-dev-server`:
-```sh
-npm install webpack-dev-server@2.1.0-beta.9 --save-dev
-```
-这是webpack提供的用来开发调试的服务器, 让你可以在`http://127.0.0.1:8080/`这样的url打开页面来调试,
+`--save-dev`会把webpack记录到`package.json`中的`devDependencies`对象中, 这用来干嘛, 我们等会用到再说.
+
+`webpack-dev-server`是webpack提供的用来开发调试的服务器, 让你可以在http://127.0.0.1:8080/这样的url打开页面来调试,
 有了它就不用配置nginx了, 方便很多.
 
-接下来, 为了能用上[ES6 (ES2015)](http://es6.ruanyifeng.com/), 我们来装一个[babel](http://babeljs.io/),
-它用来把我们写的ES6语法转化成ES5, 这样我们源代码写ES6, 打包时生成ES5, 让不支持ES6的浏览器(比如IE)也能照常运行脚本
+`html-webpack-plugin`是用来打包入口文html文件的插件, 具体的等会讲.
+
+接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/),
+它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
 ```sh
 npm install babel-core babel-preset-latest babel-loader --save-dev
 ```
-`npm install`可以一次安装多个模块, 模块间用空格隔开. 这里`babel-core`顾名思义是babel的核心编译器.
-`babel-preset-latest`是一个配置文件, 意思是转换ES2015/ES2016/ES2017到ES5, 是的, 不只ES6哦.
+这里`babel-core`顾名思义是babel的核心编译器. `babel-preset-latest`是一个配置文件, 意思是转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦.
 babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装`babel-preset-es2015`:
 ```sh
 npm install babel-preset-es2015 --save-dev
@@ -230,47 +293,9 @@ npm install babel-preset-es2015 --save-dev
 
 `babel-loader`是webpack的插件, 等会用到时再说.
 
-然后, 我们安装[eslint](http://eslint.org/), 用来检查语法报错, 当我们书写js时, 有错误的地方会出现提示.
-```sh
-npm install eslint eslint-config-enough --save-dev
-```
-这里`eslint-config-enough`是配置文件, 它规定了代码规范, 要使它生效, 我们同样要在`package.json`中添加内容:
-```json
-{
-  "name": "simple",
-  "version": "1.0.0",
 
-  "eslintConfig": {
-    "extends": "enough",
-    "env": {
-      "browser": true,
-      "commonjs": true
-    }
-  }
-}
+### 配置webpack
 
-```
-业界最有名的语法规范是[airbnb](https://github.com/airbnb/javascript)出品的, 但它规定的太死板了,
-比如不允许使用`for-of`和`for-in`等. 感兴趣的同学可以参照[这里](https://www.npmjs.com/package/eslint-config-airbnb)安装使用.
-
-项目里安装了eslint还没用, 我们的IDE和编辑器也得要装eslint插件支持它. [atom](https://atom.io/)需要安装[linter](https://atom.io/packages/linter)和[linter-eslint](https://atom.io/packages/linter-eslint)这两个插件,
-装好后重启生效. [WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
-
-![WebStorm ESLint Config](webstorm-eslint-config.png)
-
-接下来我们进到[examples/simple](examples/simple)目录, 先来看一下目录结构:
-```
-├── dist                      打包输出目录, 只需部署这个目录到生产环境
-├── package.json              项目配置信息
-├── node_modules              npm安装的依赖包都在这里面
-├── src                       我们的源代码
-│   ├── components            可以复用的模块放在这里面
-│   ├── index.html            入口html
-│   ├── index.js              入口js
-│   ├── libs                  不在npm和git上的库扔这里
-│   └── views                 页面放这里
-└── webpack.config.babel.js   webpack配置文件
-```
 
 ### 浏览器里看看效果
 我们打开命令行窗口, `cd`到examples/simple目录, 然后安装依赖包:
@@ -278,5 +303,6 @@ npm install eslint eslint-config-enough --save-dev
 npm install
 ```
 npm会把`package.json`中`dependencies`和`devDependencies`记录的包下载到`node_modules`目录.
+
 
 ## 来搞一个大项目

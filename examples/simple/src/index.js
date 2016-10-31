@@ -1,1 +1,1 @@
-var a = 1;
+document.body.innerHTML = '<h1>Hello World</h1>';
