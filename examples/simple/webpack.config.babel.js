@@ -45,7 +45,7 @@ export default function(options = {}) {
       /*
 
       */
-      chunkFilename: '[id].js?[chunkhash]'
+      chunkFilename: '[id].js?[chunkhash]',
 
       /*
       浏览器引用文件时的路径前缀, 不包含域名
@@ -53,7 +53,7 @@ export default function(options = {}) {
       http://www.example.com/assets/index.js
       访问入口js文件
       */
-      publicPath: '/assets/',
+      publicPath: '/assets/'
     },
 
     module: {
