@@ -192,6 +192,18 @@ npm install eslint eslint-config-enough --save-dev
 ```
 `npm install`可以一条命令同时安装多个包, 包之间用空格分隔. 包会被安装进`node_modules`目录中.
 
+`--save-dev`会把安装的包和版本号记录到`package.json`中的`devDependencies`对象中,
+还有一个`--save`, 会记录到`dependencies`对象中, 它们的区别, 我们可以先简单的理解为打包工具和测试工具用到的包使用`--save-dev`存到`devDependencies`, 比如eslint, webpack. 浏览器中执行的js用到的包存到`dependencies`, 比如jQuery等.
+那么它们用来干嘛的?
+因为有些npm包安装是需要编译的, 那么导致windows/mac/linux上编译出的二进制是不同的, 也就是无法通用,
+因此我们在提交代码到git上去的时候, 一般都会在`.gitignore`里指定忽略node_modules目录和里面的文件,
+这样其他人从git上拉下来的项目是没有node_modules目录的, 这时我们需要运行
+```sh
+npm install
+```
+它会读取`package.json`中的`devDependencies`和`dependencies`字段, 把记录的包的相应版本下载下来.
+
+
 这里`eslint-config-enough`是配置文件, 它规定了代码规范, 要使它生效, 我们要在`package.json`中添加内容:
 ```json
 {
@@ -232,13 +244,95 @@ npm install eslint eslint-config-enough --save-dev
   </body>
 </html>
 ```
-它是一个空白页面, layout和
+它是一个空白页面, 注意这里我们不需要自己写`<script src="index.js"></script>`, 因为打包后的文件名和路径可能会变,
+所以我们用webpack插件帮我们自动加上.
+
+然后重点是`src/index.js`:
+```js
+// 引入作为全局对象储存空间的global.js, js文件可以省略后缀
+import global from './global';
+
+// Router类, 用来控制页面根据当前URL切换
+class Router {
+  start() {
+    // 点击浏览器后退/前进按钮时会触发window.onpopstate事件, 我们在这时切换到相应页面
+    // https://developer.mozilla.org/en-US/docs/Web/Events/popstate
+    window.addEventListener('popstate', () => {
+      this.load(location.pathname);
+    });
+
+    // 打开页面时加载当前页面
+    this.load(location.pathname);
+  }
+
+  // 前往path, 会变更地址栏URL, 并加载相应页面
+  go(path) {
+    // 变更地址栏URL
+    history.pushState({}, '', path);
+    // 加载页面
+    this.load(path);
+  }
+
+  // 加载path路径的页面
+  load(path) {
+    // 使用System.import将加载的js文件分开打包, 这样实现了仅加载访问的页面
+    // https://gist.github.com/sokra/27b24881210b56bbaff7#code-splitting-with-es6
+    // http://webpack.github.io/docs/code-splitting.html
+    System.import('./views' + path + '/index.js').then(module => {
+      // 加载的js文件通过 export default ... 导出的东西会被赋值为module.default
+      const View = module.default;
+      // 创建页面实例
+      const view = new View();
+      // 调用页面方法, 把页面加载到document.body中
+      view.mount(document.body);
+    });
+  }
+}
+
+// new一个路由对象, 赋值为global.router, 这样我们在其他js文件中可以引用到
+global.router = new Router();
+// 启动
+global.router.start();
+```
+[window.onpopstate](https://developer.mozilla.org/en-US/docs/Web/Events/popstate)和[System.import()](https://gist.github.com/sokra/27b24881210b56bbaff7#code-splitting-with-es6)构成了SPA路由控制的核心.
+
+现在我们还没有讲webpack配置所以页面还无法访问, 我们先从理论上讲解一下, 等会弄好webpack配置后再实际看页面效果.
+当我们访问 `http://localhost:8010/foo` 的时候, 路由会加载 `./views/foo/index.js`文件, 我们来看看这个文件:
+```js
+// 引入全局对象
+import global from '../../global';
+
+// 引入html模板, 会被作为字符串引入
+import template from './index.html';
+
+// 引入css, 会生成<style>块插入到<head>头中
+import './style.css';
+
+// 导出类
+export default class {
+  mount(container) {
+    document.title = 'foo';
+    container.innerHTML = template;
+    container.querySelector('.foo__gobar').addEventListener('click', () => {
+      // 调用router.go方法加载 /bar 页面
+      global.router.go('/bar');
+    });
+  }
+}
+```
+借助webpack插件, 我们可以`import` html, css等其他格式的文件, 文本类的文件会被储存为变量打包进js文件,
+其他二进制类的文件, 比如图片, 可以自己配置, 小图片作为[Data URI](https://en.wikipedia.org/wiki/Data_URI_scheme)打包进js文件,
+大文件打包为单独文件, 我们稍后再讲这块.
+
+其他的`src`目录下的文件大家自己浏览, 拷贝一份到自己的工作目录, 等会打包时会用到.
+
+页面代码这样就差不多搞定了, 接下来我们进入webpack的安装和配置阶段.
 
 
 ### 安装webpack和Babel
-然后, 我们把webpack和它的插件安装到项目:
+我们把webpack和它的插件安装到项目:
 ```sh
-npm install webpack@2.1.0-beta.25 webpack-dev-server@2.1.0-beta.9 html-webpack-plugin --save-dev
+npm install webpack@2.1.0-beta.25 webpack-dev-server@2.1.0-beta.9 html-webpack-plugin html-loader css-loader style-loader --save-dev
 ```
 这里, 我们用`@2.1.0-beta.25`指定了webpack版本号,
 因为2还在beta, 不指定的话默认会装1. 因为2基本没问题了, 所以就没必要教大家用1了.
@@ -248,12 +342,12 @@ npm show webpack versions --json
 ```
 最后一个就是了.
 
-`--save-dev`会把webpack记录到`package.json`中的`devDependencies`对象中, 这用来干嘛, 我们等会用到再说.
-
 `webpack-dev-server`是webpack提供的用来开发调试的服务器, 让你可以在http://127.0.0.1:8080/这样的url打开页面来调试,
 有了它就不用配置nginx了, 方便很多.
 
-`html-webpack-plugin`是用来打包入口文html文件的插件, 具体的等会讲.
+`html-webpack-plugin`, `html-loader`, `css-loader`, `style-loader`等看名字就知道是打包html文件, css文件的插件,
+大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别,
+我们等会看配置文件的时候在讲.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/),
 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
@@ -272,7 +366,14 @@ npm install babel-preset-es2015 --save-dev
   "version": "1.0.0",
 
   "babel": {
-    "presets": ["latest", { "modules": false }]
+    "presets": [
+      [
+        "latest",
+        {
+          "modules": false
+        }
+      ]
+    ]
   }
 }
 ```
@@ -286,15 +387,27 @@ npm install babel-preset-es2015 --save-dev
   "version": "1.0.0",
 
   "babel": {
-    "presets": ["es2015", { "modules": false }]
+    "presets": [
+      [
+        "es2015",
+        {
+          "modules": false
+        }
+      ]
+    ]
   }
 }
 ```
 
-`babel-loader`是webpack的插件, 等会用到时再说.
+`babel-loader`是webpack的插件, 我们下面章节再说.
 
 
 ### 配置webpack
+包都装好了, 接下来, 总算可以进入正题了, 是不是有点心累...呵呵.
+我们来创建webpack配置文件`webpack.config.babel.js`, 这里文件名里有`babel`, webpack会识别文件里的ES6语法.
+我们来看文件内容:
+```js
+```
 
 
 ### 浏览器里看看效果
