@@ -332,7 +332,7 @@ export default class {
 ### 安装webpack和Babel
 我们把webpack和它的插件安装到项目:
 ```sh
-npm install webpack@2.1.0-beta.25 webpack-dev-server@2.1.0-beta.9 html-webpack-plugin html-loader css-loader style-loader --save-dev
+npm install webpack@2.1.0-beta.25 webpack-dev-server@2.1.0-beta.9 html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
 这里, 我们用`@2.1.0-beta.25`指定了webpack版本号,
 因为2还在beta, 不指定的话默认会装1. 因为2基本没问题了, 所以就没必要教大家用1了.
@@ -347,7 +347,9 @@ npm show webpack versions --json
 
 `html-webpack-plugin`, `html-loader`, `css-loader`, `style-loader`等看名字就知道是打包html文件, css文件的插件,
 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别,
-我们等会看配置文件的时候在讲.
+我们等会看配置文件的时候再讲.
+
+`file-loader`和`url-loader`是打包二进制文件的插件, 具体也在配置文件章节讲解.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/),
 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
