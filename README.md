@@ -653,7 +653,33 @@ export default function(options = {}) {
 ```
 
 
-### 浏览器里看看效果
+### 走一个
+配置OK了, 接下来我们就运行一下吧. 我们先试一下开发环境用的webpack-dev-server:
+```sh
+./node_modules/.bin/webpack-dev-server --hot --inline --env.dev
+```
+npm会把包的可执行文件安装到`./node_modules/.bin/`目录下.
+`--hot`, 热更新功能, 参数会帮我们往配置里添加`HotModuleReplacementPlugin`插件, 虽然可以在配置里自己写,
+但有点麻烦, 用命令行参数方便很多.
 
+`--inline`参数指定页面自动刷新的模式为inline, 它会把webpack-dev-server的运行时代码打包进我们的源代码,
+用来配合热更新使用.
+
+`--env.dev`是我们自定义的参数, 在配置文件中
+```
+filename: options.dev ? '[name].js' : '[name].js?[chunkhash]'
+```
+这个地方会根据是否是开发环境用不同的filename.
+
+命令执行后, 控制台的最后一行应该是
+```
+webpack: bundle is now VALID.
+```
+这就代表编译成功了, 我们可以在浏览器打开 `http://localhost:8010/foo` 看看效果.
+如果有报错, 那可能是什么地方没弄对? 请自己仔细检查一下~
+
+我们可以随意更改一下src目录下的源代码, 保存后, 浏览器里的页面应该很快会有相应变化.
+
+要退出编译, 按`ctrl+c`.
 
 ## 来搞一个大项目
