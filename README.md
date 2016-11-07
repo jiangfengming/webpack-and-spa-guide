@@ -687,4 +687,30 @@ webpack: bundle is now VALID.
 ```
 `-p`参数会开启生产环境模式, 这个模式下webpack会将代码做压缩等优化.
 
+大家可能会发现, 执行脚本的命令有点麻烦. 因此, 我们可以利用npm的特性, 把命令写在`package.json`中:
+```json
+{
+  "name": "simple",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server -d --hot --env.dev",
+    "build": "webpack -p"
+  }
+}
+```
+`package.json`中的`scripts`对象, 可以用来写一些脚本命令, 命令不需要前缀目录`./node_modules/.bin/`,
+npm会自动寻找该目录下的命令. 我们可以执行:
+```sh
+npm run dev
+```
+来启动开发环境.
+
+执行
+```sh
+npm run build
+```
+来打包生产环境的代码.
+
+
 ## 来搞一个大项目
