@@ -440,10 +440,8 @@ export default function(options = {}) {
       <script type="text/javascript" src="/assets/index.js?d835352892e6aac768bf"></script>
       这里/assets/目录前缀是下面的publicPath配置的
 
-      options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有chunkhash的, 用了会报错
-      因此我们不得已在使用webpack-dev-server启动项目时, 不在后面跟chunkhash, 启动命令如下:
-      webpack-dev-server --hot --inline --env.dev
-      --hot和--inline下面讲
+      options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
+      因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在后面跟[chunkhash]
 
       有人可能注意到官网文档中还有一个[hash]占位符, 这个hash是整个编译过程产生的一个总的hash值,
       它不是针对单个文件的, 并且项目中任何一个文件的改动, 甚至内容没有改变只修改了文件修改日期属性,
@@ -656,14 +654,15 @@ export default function(options = {}) {
 ### 走一个
 配置OK了, 接下来我们就运行一下吧. 我们先试一下开发环境用的webpack-dev-server:
 ```sh
-./node_modules/.bin/webpack-dev-server --hot --inline --env.dev
+./node_modules/.bin/webpack-dev-server -d --hot --env.dev
 ```
-npm会把包的可执行文件安装到`./node_modules/.bin/`目录下.
-`--hot`, 热更新功能, 参数会帮我们往配置里添加`HotModuleReplacementPlugin`插件, 虽然可以在配置里自己写,
-但有点麻烦, 用命令行参数方便很多.
+npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以我们要在这个目录下执行命令.
 
-`--inline`参数指定页面自动刷新的模式为inline, 它会把webpack-dev-server的运行时代码打包进我们的源代码,
-用来配合热更新使用.
+`-d`参数是开发环境(Development)的意思, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug,
+打开sourceMap, 代码中插入源文件路径注释.
+
+`--hot`开启热更新功能, 参数会帮我们往配置里添加`HotModuleReplacementPlugin`插件, 虽然可以在配置里自己写,
+但有点麻烦, 用命令行参数方便很多.
 
 `--env.dev`是我们自定义的参数, 在配置文件中
 ```
@@ -681,5 +680,11 @@ webpack: bundle is now VALID.
 我们可以随意更改一下src目录下的源代码, 保存后, 浏览器里的页面应该很快会有相应变化.
 
 要退出编译, 按`ctrl+c`.
+
+开发环境编译试过之后, 我们试试看编译生产环境的代码, 命令是:
+```sh
+./node_modules/.bin/webpack -p
+```
+`-p`参数会开启生产环境模式, 这个模式下webpack会将代码做压缩等优化.
 
 ## 来搞一个大项目

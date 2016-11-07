@@ -29,10 +29,8 @@ export default function(options = {}) {
       <script type="text/javascript" src="/assets/index.js?d835352892e6aac768bf"></script>
       这里/assets/目录前缀是下面的publicPath配置的
 
-      options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有chunkhash的, 用了会报错
-      因此我们不得已在使用webpack-dev-server启动项目时, 不在后面跟chunkhash, 启动命令如下:
-      webpack-dev-server --hot --inline --env.dev
-      --hot和--inline下面讲
+      options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
+      因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在后面跟[chunkhash]
 
       有人可能注意到官网文档中还有一个[hash]占位符, 这个hash是整个编译过程产生的一个总的hash值,
       它不是针对单个文件的, 并且项目中任何一个文件的改动, 甚至内容没有改变只修改了文件修改日期属性,
