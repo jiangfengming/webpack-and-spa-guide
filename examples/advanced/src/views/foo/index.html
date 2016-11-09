@@ -1,0 +1,21 @@
+<div class="foo">
+  <h1>Page Foo</h1>
+  <a href="javascript:" class="foo__gobar">goto bar</a>
+
+  <p>
+    <!--
+    小于10kb的图片, <img>标签的src被编译为Data URI格式
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAA...">
+    具体在后面的webpack配置那章讲解
+    -->
+    <img src="smallpic.png">
+  </p>
+
+  <p>
+    <!--
+    大于10kb的图片, 图片会被储存到输出目录, src会被替换为打包后的路径
+    <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
+    -->
+    <img src="largepic.png">
+  </p>
+</div>
