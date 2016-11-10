@@ -420,7 +420,8 @@ webpack --env.dev --env.server localhost
 该参数对 webpack-dev-server 命令同样有效
 */
 export default function(options = {}) {
-  const config = {
+  // 返回配置对象给webpack
+  return {
     // 配置页面入口js文件
     entry: {
       // 属性名index用来和下面的output.filename配合使用
@@ -644,9 +645,6 @@ export default function(options = {}) {
       }
     }
   };
-
-  // 返回配置对象给webpack
-  return config;
 }
 ```
 

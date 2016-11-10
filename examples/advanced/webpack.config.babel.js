@@ -3,7 +3,8 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 export default function(options = {}) {
   const config = {
     entry: {
-      index: './src/index.js'
+      vendor: './src/vendor',
+      index: './src/index'
     },
 
     output: {
