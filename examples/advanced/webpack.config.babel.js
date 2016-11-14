@@ -1,3 +1,4 @@
+import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default function(options = {}) {
@@ -19,12 +20,12 @@ export default function(options = {}) {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          loader: 'babel'
+          loader: 'babel-loader'
         },
 
         {
           test: /\.html$/,
-          loader: 'html',
+          loader: 'html-loader',
           query: {
             attrs: ['img:src', 'link:href']
           }
@@ -32,18 +33,18 @@ export default function(options = {}) {
 
         {
           test: /\.css$/,
-          loader: 'style!css'
+          loader: 'style-loader!css-loader'
         },
 
         {
           test: /favicon\.png$/,
-          loader: 'file?name=[name].[ext]?[hash]'
+          loader: 'file-loader?name=[name].[ext]?[hash]'
         },
 
         {
           test: /\.(png|jpg|jpeg|gif|eot|ttf|woff|woff2|svg|svgz)(\?.+)?$/,
           exclude: /favicon\.png$/,
-          loader: 'url?limit=10000'
+          loader: 'url-loader?limit=10000'
         }
       ]
     },
@@ -51,6 +52,11 @@ export default function(options = {}) {
     plugins: [
       new HtmlWebpackPlugin({
         template: 'src/index.html'
+      }),
+
+      new webpack.optimize.CommonsChunkPlugin({
+        names: ['vendor', 'manifest'],
+        minChunks: Infinity
       })
     ],
 

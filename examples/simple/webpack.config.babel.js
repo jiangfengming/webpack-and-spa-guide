@@ -77,8 +77,8 @@ export default function(options = {}) {
           test: /\.js$/,
           // 排除node_modules目录下的文件, npm安装的包不需要编译
           exclude: /node_modules/,
-          // 指定加载器为babel, 就是我们刚才安装的babel-loader包, "-loader"可以省略
-          loader: 'babel'
+          // 指定加载器为babel-loader, 就是我们刚才用npm安装的babel-loader包
+          loader: 'babel-loader'
         },
 
         {
@@ -89,7 +89,7 @@ export default function(options = {}) {
           import htmlString from './template.html';
           template.html的文件内容会被转成一个js字符串, 合并到js文件里.
           */
-          loader: 'html',
+          loader: 'html-loader',
           // loader可以接受参数, 接受什么参数由各个loader自己定义
           query: {
             /*
@@ -121,7 +121,7 @@ export default function(options = {}) {
           先使用css-loader处理, 返回的结果交给style-loader处理, loader之间使用!分隔, 从右往左处理.
           css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
-          loader: 'style!css'
+          loader: 'style-loader!css-loader'
         },
 
         {
@@ -144,7 +144,7 @@ export default function(options = {}) {
           [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
           这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
           */
-          loader: 'file?name=[name].[ext]?[hash]'
+          loader: 'file-loader?name=[name].[ext]?[hash]'
         },
 
         {
@@ -174,7 +174,7 @@ export default function(options = {}) {
           会被编译成
           <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
           */
-          loader: 'url?limit=10000'
+          loader: 'url-loader?limit=10000'
         }
       ]
     },

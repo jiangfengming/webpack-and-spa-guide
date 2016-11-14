@@ -1,3 +1,5 @@
+import Url from 'browser-url';
+
 // 引入作为全局对象储存空间的global.js, js文件可以省略后缀
 import global from './global';
 
