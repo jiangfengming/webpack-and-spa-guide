@@ -1,1 +1,1 @@
-import 'browser-url';
+import 'spa-history';

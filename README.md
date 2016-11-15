@@ -721,3 +721,104 @@ npm run build
 那么, 让我们在上面的配置的基础上继续完善.
 
 ### 第三方库和业务代码分开打包
+我们的思路是, 入口的html文件引两个js, `vendor.js`和`index.js`. `vendor.js`用来引用第三方库,
+比如这儿我们引入一个第三方库来做路由, 我们先安装它:
+```sh
+npm install spa-history --save
+```
+然后在`vendor.js`中, 我们引用一下它:
+```js
+import 'spa-history';
+```
+我们`import`它但不需要做什么, 这样webpack打包的时候会把这个第三方库打包进`vendor.js.`
+
+然后在`index.js`中, 我们使用它:
+```js
+import SpaHistory from 'spa-history';
+
+new SpaHistory({
+  onNavigate(location) {
+    System.import('./views' + location.path + '/index.js').then(module => {
+      const View = module.default;
+      const view = new View();
+      view.mount(document.body);
+    });
+  }
+});
+```
+页面`foo`和`bar`的js和html文件因为路由的改变也要做些微调, 这里就不多说了, 大家自己抄一下.
+
+然后最重要的webpack的配置需要修改一下:
+```js
+// 引入webpack, 等会需要用
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+
+export default function(options = {}) {
+  return {
+    entry: {
+      // 添加vendor.js问入口js文件
+      vendor: './src/vendor',
+      index: './src/index'
+    },
+
+    // ...省略未改动的配置
+
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: 'src/index.html'
+      }),
+
+      /*
+      使用CommonsChunkPlugin插件来处理重复代码
+      因为vendor.js和index.js都引用了spa-history, 如果不处理的话, 两个文件里都会有spa-history包的代码,
+      我们用CommonsChunkPlugin插件使index.js直接引用vendor.js中的第三方库
+      */
+      new webpack.optimize.CommonsChunkPlugin({
+        /*
+        names配置entry中的文件引用的相同库打包进哪个文件, 可以是新建文件, 也可以是entry中已存在的文件
+        这里我们指定引用的相同库打包进vendor.js
+
+        但这样还不够, 还记得那个chunkFilename参数吗? 这个参数指定了chunk的打包输出的名字,
+        我们设置为 [id].js?[chunkhash] 的格式. 那么打包后这个文件名字符串是存在哪里的呢?
+        它就存在引用它的文件中. 这就意味着每次修改被引用的文件, 即使文件本身没变, 也会因为引用的文件的改变而导致改变.
+
+        然后CommonsChunkPlugin有个附加效果, 会把所有的chunk文件名合并到names指定的文件中.
+        那么这时当我们修改foo或者bar的时候, vendor.js也会跟着改变, 而index.js不会变.
+        那么怎么处理这些chunk文件名呢?
+
+        这里我们用了一点小技巧. names参数可以是一个数组, 意思相当于调用多次CommonsChunkPlugin,
+        比如:
+
+        plugins: [
+          new webpack.optimize.CommonsChunkPlugin({
+            names: ['vendor', 'manifest']
+          })
+        ]
+
+        相当于
+
+        plugins: [
+          new webpack.optimize.CommonsChunkPlugin({
+            names: 'vendor'
+          }),
+
+          new webpack.optimize.CommonsChunkPlugin({
+            names: 'manifest'
+          })
+        ]
+
+        首先把重复引用的库打包进vendor.js, 这时候我们的代码里已经没有重复引用了, chunk文件名存在vendor.js中,
+        然后我们在执行一次CommonsChunkPlugin, 把chunk文件名打包到manifest.js中.
+        这样我们就实现了chunk文件名和代码的分离. 这样修改一个js文件不会导致其他js文件在打包时发生改变.
+        */
+        names: ['vendor', 'manifest']
+      })
+    ],
+
+    // ...
+  };
+}
+```
+
+### 执行命令行时可以自定义部分配置

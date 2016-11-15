@@ -2,7 +2,7 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default function(options = {}) {
-  const config = {
+  return {
     entry: {
       vendor: './src/vendor',
       index: './src/index'
@@ -55,8 +55,7 @@ export default function(options = {}) {
       }),
 
       new webpack.optimize.CommonsChunkPlugin({
-        names: ['vendor', 'manifest'],
-        minChunks: Infinity
+        names: ['vendor', 'manifest']
       })
     ],
 
@@ -67,6 +66,4 @@ export default function(options = {}) {
       }
     }
   };
-
-  return config;
 }
