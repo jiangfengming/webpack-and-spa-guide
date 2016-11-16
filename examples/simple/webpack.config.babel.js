@@ -77,8 +77,12 @@ export default function(options = {}) {
           test: /\.js$/,
           // 排除node_modules目录下的文件, npm安装的包不需要编译
           exclude: /node_modules/,
-          // 指定加载器为babel-loader, 就是我们刚才用npm安装的babel-loader包
-          loader: 'babel-loader'
+          /*
+          先使用eslint-loader处理, 返回的结果交给babel-loader处理, loader之间使用!分隔, 从右往左处理.
+          eslint-loader用来检查代码, 如果有错误, 编译的时候会报错.
+          babel-loader用来编译js文件.
+          */
+          loader: 'babel-loader!eslint-loader'
         },
 
         {
@@ -118,7 +122,7 @@ export default function(options = {}) {
           test: /\.css$/,
 
           /*
-          先使用css-loader处理, 返回的结果交给style-loader处理, loader之间使用!分隔, 从右往左处理.
+          先使用css-loader处理, 返回的结果交给style-loader处理.
           css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
           loader: 'style-loader!css-loader'

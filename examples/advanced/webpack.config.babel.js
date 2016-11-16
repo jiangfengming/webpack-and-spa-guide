@@ -2,6 +2,9 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default function(options = {}) {
+  const profile = require('./conf/' + (options.profile || 'default'));
+  const pkgInfo = require('./package.json');
+
   return {
     entry: {
       vendor: './src/vendor',
@@ -20,7 +23,7 @@ export default function(options = {}) {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          loader: 'babel-loader'
+          loader: 'babel-loader!eslint-loader'
         },
 
         {
@@ -56,14 +59,25 @@ export default function(options = {}) {
 
       new webpack.optimize.CommonsChunkPlugin({
         names: ['vendor', 'manifest']
+      }),
+
+      new webpack.DefinePlugin({
+        DEBUG: Boolean(options.dev),
+        VERSION: JSON.stringify(pkgInfo.version),
+        CONF: JSON.stringify({
+          experimentalFeatures: profile.experimentalFeatures,
+          thirdPartyApiKey: profile.thirdPartyApiKey
+        })
       })
     ],
 
     devServer: {
-      port: 8010,
+      port: profile.devServer.port,
       historyApiFallback: {
         index: '/assets/'
-      }
+      },
+
+      proxy: profile.devServer.proxy
     }
   };
 }

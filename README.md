@@ -188,7 +188,7 @@ npm init
 ### 给项目加上语法报错和代码规范检查
 我们安装[eslint](http://eslint.org/), 用来检查语法报错, 当我们书写js时, 有错误的地方会出现提示.
 ```sh
-npm install eslint eslint-config-enough --save-dev
+npm install eslint eslint-config-enough eslint-loader --save-dev
 ```
 `npm install`可以一条命令同时安装多个包, 包之间用空格分隔. 包会被安装进`node_modules`目录中.
 
@@ -204,7 +204,8 @@ npm install
 它会读取`package.json`中的`devDependencies`和`dependencies`字段, 把记录的包的相应版本下载下来.
 
 
-这里`eslint-config-enough`是配置文件, 它规定了代码规范, 要使它生效, 我们要在`package.json`中添加内容:
+这里[eslint-config-enough](https://github.com/fenivana/eslint-config-enough)是配置文件,
+它规定了代码规范, 要使它生效, 我们要在`package.json`中添加内容:
 ```json
 {
   "name": "simple",
@@ -227,6 +228,9 @@ npm install
 装好后重启生效. [WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
 
 ![WebStorm ESLint Config](assets/webstorm-eslint-config.png)
+
+(https://github.com/MoOx/eslint-loader)[eslint-loader]用于在webpack编译的时候检查代码,
+如果有错误, webpack会报错.
 
 ### 写几个页面
 我们写一个最简单的SPA应用来介绍SPA应用的内部工作原理.
@@ -342,26 +346,29 @@ npm show webpack versions --json
 ```
 最后一个就是了.
 
-`webpack-dev-server`是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试,
-有了它就不用配置nginx了, 方便很多.
+[webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试,
+有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.
 
-`html-webpack-plugin`, `html-loader`, `css-loader`, `style-loader`等看名字就知道是打包html文件, css文件的插件,
+[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin),
+[html-loader](https://github.com/webpack/html-loader),
+[css-loader](https://github.com/webpack/css-loader),
+[style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件,
 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别,
 我们等会看配置文件的时候再讲.
 
-`file-loader`和`url-loader`是打包二进制文件的插件, 具体也在配置文件章节讲解.
+[file-loader](https://github.com/webpack/file-loader)和[url-loader](https://github.com/webpack/url-loader)是打包二进制文件的插件, 具体也在配置文件章节讲解.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/),
 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
 ```sh
 npm install babel-core babel-preset-latest babel-loader --save-dev
 ```
-这里`babel-core`顾名思义是babel的核心编译器. `babel-preset-latest`是一个配置文件, 意思是转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦.
-babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装`babel-preset-es2015`:
+这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-latest](https://babeljs.io/docs/plugins/preset-latest/)是一个配置文件, 意思是转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦.
+babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装[babel-preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/):
 ```sh
 npm install babel-preset-es2015 --save-dev
 ```
-但是光安装了`babel-preset-latest`, 在打包时是不会生效的, 需要在`package.json`加入这些内容:
+但是光安装了`babel-preset-latest`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
 ```json
 {
   "name": "simple",
@@ -369,18 +376,12 @@ npm install babel-preset-es2015 --save-dev
 
   "babel": {
     "presets": [
-      [
-        "latest",
-        {
-          "modules": false
-        }
-      ]
+      "latest"
     ]
   }
 }
 ```
 打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.
-这里的`"modules": false`配置是禁止babel转ES6模块语法到CommonJS语法, 因为webpack 2支持ES6模块.
 
 如果使用`babel-preset-es2015`, 这里相应的也要修改为:
 ```json
@@ -390,18 +391,13 @@ npm install babel-preset-es2015 --save-dev
 
   "babel": {
     "presets": [
-      [
-        "es2015",
-        {
-          "modules": false
-        }
-      ]
+      "es2015"
     ]
   }
 }
 ```
 
-`babel-loader`是webpack的插件, 我们下面章节再说.
+[babel-loader](https://github.com/babel/babel-loader)是webpack的插件, 我们下面章节再说.
 
 
 ### 配置webpack
@@ -488,8 +484,12 @@ export default function(options = {}) {
           test: /\.js$/,
           // 排除node_modules目录下的文件, npm安装的包不需要编译
           exclude: /node_modules/,
-          // 指定加载器为babel-loader, 就是我们刚才用npm安装的babel-loader包
-          loader: 'babel-loader'
+          /*
+          先使用eslint-loader处理, 返回的结果交给babel-loader处理, loader之间使用!分隔, 从右往左处理.
+          eslint-loader用来检查代码, 如果有错误, 编译的时候会报错.
+          babel-loader用来编译js文件.
+          */
+          loader: 'babel-loader!eslint-loader'
         },
 
         {
@@ -529,7 +529,7 @@ export default function(options = {}) {
           test: /\.css$/,
 
           /*
-          先使用css-loader处理, 返回的结果交给style-loader处理, loader之间使用!分隔, 从右往左处理.
+          先使用css-loader处理, 返回的结果交给style-loader处理.
           css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
           loader: 'style-loader!css-loader'
@@ -715,7 +715,7 @@ npm run build
 上面的项目虽然可以跑起来了, 但有几个点我们还没有考虑到:
 * 第三方库的代码最好和业务代码分开打包, 这样更新业务代码时可以借助浏览器缓存, 用户不需要重新下载没有发生变化的第三方库
 * 在多人开发时, 每个人可能需要有自己的配置, 比如说webpack-dev-server监听的端口号, 如果写死在webpack配置里,
-  而那个端口号在其他同学的电脑上被其他进程占用了, 修改起来就很麻烦
+  而那个端口号在某个同学的电脑上被其他进程占用了, 简单粗暴的修改`webpack.config.babel.js`会导致提交代码后其他同学的端口也被改掉.
 * 在业务代码中, 我们可能会有需求知道当前的环境, 比如如果是在debug模式, 就`console.log()`一些调试信息出来
 
 那么, 让我们在上面的配置的基础上继续完善.
@@ -821,4 +821,123 @@ export default function(options = {}) {
 }
 ```
 
-### 执行命令行时可以自定义部分配置
+### 执行命令行时可以自定义部分参数
+我们可以想到, 通过在命令行带入参数, 我们可以在webpack中引入指定的配置文件:
+```sh
+./node_modules/.bin/webpack-dev-server -d --hot --env.dev --env.profile=myprofile
+```
+
+当我们通过`npm run`执行脚本的时候, 往命令中传参的写法是这样的:
+```sh
+npm run dev --profile=myprofile
+```
+
+`package.json`也需要做相应修改:
+```json
+{
+  "name": "advanced",
+  "version": "1.0.0",
+
+  "scripts": {
+    "dev": "webpack-dev-server -d --hot --env.dev --env.profile=$npm_config_profile",
+    "build": "webpack -p --env.profile=$npm_config_profile"
+  }
+}
+```
+这里的关键是`npm run`传的`--profile`参数可以通过`$npm_config_profile`拿到.
+
+我们在项目根目录建立一个文件夹`conf`, 里面创建`default.js`:
+```js
+export default {
+  server: {
+    port: 8010,
+    proxy: {
+      '/api/auth/': {
+        target: 'http://api.example.dev',
+        changeOrigin: true,
+        pathRewrite: { '^/api': '' }
+      },
+
+      '/api/pay/': {
+        target: 'http://pay.example.dev',
+        changeOrigin: true,
+        pathRewrite: { '^/api': '' }
+      }
+    }
+  }
+};
+```
+
+`default.js`作为不传profile参数时的默认配置, 然后我们创建`myprofile.js`:
+```js
+import conf from './default';
+conf.devServer.port = 8020;
+export default conf;
+```
+`myprofile.js`引用默认配置, 修改`port`为`8020`.
+
+然后在`webpack.config.babel.js`中, 我们相应的修改一下导出的函数:
+```js
+export default function(options = {}) {
+  // require()和System.import()一样, export default ... 的东西被赋值到了default属性中
+  const profile = require('./conf/' + (options.profile || 'default')).default;
+
+  return {
+    // ...省略未改动部分
+
+    devServer: {
+      port: profile.devServer.port,
+      historyApiFallback: {
+        index: '/assets/'
+      },
+
+      proxy: profile.devServer.proxy
+    }
+  }
+}
+```
+这样, 我们就实现了不同的人或者环境, 自定义部分参数.
+
+这里我们需要用require()来动态加载js文件, 因为import不支持动态加载, System.import()是异步加载, 不方便.
+
+`profile.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
+`/api/pay/*`的请求会被转发到 `http://api.example.dev/pay/*`.
+
+`changeOrigin`会修改HTTP请求头中的`Host`为`target`的域名, 这里会被改为`api.example.dev`
+
+`pathRewrite`用来改写URL, 这里我们把`/api`前缀去掉.
+
+
+还有一点, 我们一般不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
+```
+conf/*
+!conf/default.js
+```
+把`conf`目录排除掉, 但是保留默认配置文件.
+
+
+### 往代码中插入一些环境变量
+这里我们用到了[DefinePlugin](http://webpack.github.io/docs/list-of-plugins.html#defineplugin)插件.
+```js
+export default function(options = {}) {
+  const profile = require('./conf/' + (options.profile || 'default')).default;
+  const pkgInfo = require('./package.json');
+
+  return {
+    // ...省略未改动部分
+
+    plugins: [
+      // ...
+
+      new webpack.DefinePlugin({
+        DEBUG: Boolean(options.dev),
+        VERSION: JSON.stringify(pkgInfo.version),
+        CONF: JSON.stringify({
+          experimentalFeatures: profile.experimentalFeatures,
+          thirdPartyApiKey: profile.thirdPartyApiKey
+        })
+      })
+    ]
+  }
+}
+```
