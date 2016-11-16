@@ -229,7 +229,7 @@ npm install
 
 ![WebStorm ESLint Config](assets/webstorm-eslint-config.png)
 
-(https://github.com/MoOx/eslint-loader)[eslint-loader]用于在webpack编译的时候检查代码,
+[eslint-loader](https://github.com/MoOx/eslint-loader)用于在webpack编译的时候检查代码,
 如果有错误, webpack会报错.
 
 ### 写几个页面
