@@ -711,7 +711,7 @@ npm run build
 来打包生产环境的代码.
 
 
-## 进阶优化
+## 进阶配置
 上面的项目虽然可以跑起来了, 但有几个点我们还没有考虑到:
 * 第三方库的代码最好和业务代码分开打包, 这样更新业务代码时可以借助浏览器缓存, 用户不需要重新下载没有发生变化的第三方库
 * 在多人开发时, 每个人可能需要有自己的配置, 比如说webpack-dev-server监听的端口号, 如果写死在webpack配置里,
@@ -941,3 +941,177 @@ export default function(options = {}) {
   }
 }
 ```
+
+DefinePlugin插件的原理很简单, 如果我们在代码中写:
+```js
+console.log(DEBUG)
+```
+它会做类似这样的处理:
+```js
+'console.log(DEBUG)'.replace('DEBUG', true)
+```
+最后生成:
+```js
+console.log(true)
+```
+
+这里有一点需要注意, 像这里的`VERSION`, 如果我们不对`pkgInfo.version`做`JSON.stringify()`,
+```js
+console.log(VERSION)
+```
+然后做替换操作:
+```js
+'console.log(VERSION)'.replace('VERSION', '1.0.0')
+```
+最后生成:
+```js
+console.log(1.0.0)
+```
+这样语法就错误了. 所以, 我们需要`JSON.stringify(pkgInfo.version)`转一下变成`'"1.0.0"'`, 替换的时候才会带引号.
+
+还有一点, webpack打包压缩的时候, 会把代码进行优化, 比如:
+```js
+if (DEBUG) {
+  console.log('debug mode');
+} else {
+  console.log('production mode');
+}
+```
+会被编译成:
+```js
+if (false) {
+  console.log('debug mode');
+} else {
+  console.log('production mode');
+}
+```
+然后压缩优化为:
+```js
+console.log('production mode');
+```
+
+## 还有一些细节的优化
+经过上面几轮的调教, 我们的配置文件基本完善了, 但还有一些细节的地方可以优化一下.
+
+### 引用文件的路径过于复杂
+文件a引入文件b时, b的路径是相对于a文件所在目录的. 如果a和b在不同的目录, 藏得又深, 写起来就会很麻烦:
+```js
+import b from '../../../components/b';
+```
+为了方便, 我们可以定义一个路径别名(alias):
+```js
+resolve: {
+  alias: {
+    src: __dirname + '/src'
+  }
+}
+```
+这样, 我们可以从`src`为基础路径来`import`文件:
+```js
+import b from 'src/components/b';
+```
+
+## 改进System.import()和require()
+我们已经知道, 当使用System.import()和require()引入文件时, export default ... 的东西是被赋值到`.default`属性下的.
+这样一来看起来丑, 二来经常会忘记, 我们可以用一个babel插件来改进这个小问题:
+```sh
+npm install babel-plugin-add-module-exports --save-dev
+```
+然后`package.json`中babel的配置加入这个插件:
+```json
+{
+  "babel": {
+    "presets": [
+      "latest"
+    ],
+    "plugins": [
+      "add-module-exports"
+    ]
+  }
+}
+```
+这样我们就不用写`.default`了, 比如webpack中引入自定义配置:
+```js
+const profile = require('./conf/' + (options.profile || 'default'));
+```
+
+入口index.js文件中引入页面js:
+```js
+System.import('./views' + location.path + '/index.js').then(View => {
+  const view = new View();
+  view.mount(document.body);
+});
+```
+
+## 优化babel编译后的代码的性能
+babel编译后的代码一般会造成性能损失, babel提供了一个[loose](http://www.2ality.com/2015/12/babel6-loose-mode.html)选项,
+使编译后的代码不需要完全遵循ES6规定, 简化编译后的代码, 提高代码执行效率:
+```json
+{
+  "babel": {
+    "presets": [
+      [
+        "latest",
+        {
+          "es2015": {
+            "loose": true
+          }
+        }
+      ]
+    ],
+    "plugins": [
+      "add-module-exports"
+    ]
+  }
+}
+```
+但这么做会有兼容性的风险, 可能会导致ES6源码理应的执行结果和编译后的ES5代码的实际结果并不一致.
+如果代码没有遇到实际的效率瓶颈, 官方不建议使用`loose`模式.
+
+## 使用webpack 2自带的ES6模块处理功能
+我们目前的配置, `import`和`export`都是由babel转成CommonJS模块的, 但其实webpack自己可以处理`import`和`export`,
+而且webpack处理`import`时会做代码优化, 把没用到的部分代码删除掉. 因此我们可以把babel转ES6模块到commonjs模块的功能给关闭掉.
+但这里有一个问题, webpack的配置文件`webpack.config.babel.js`自身是不经过webpack编译的,
+它只是经过babel编译后在node.js中执行, 而node.js的模块是CommonJS规范的, 因此这个文件和它引入的文件都不认识`import`和`export`.
+
+那么我们怎么babel处理webpack配置文件的`import`和`export`, 但不处理`src`目录中的呢?
+
+一个办法是, 我们可以不修改`package.json`中的配置, 而在`babel-loader`的`query`参数再写一份babel的配置,
+这样, 只有webpack处理的文件会按这份配置的规则处理:
+```js
+{
+  test: /\.js$/,
+  exclude: /node_modules/,
+  loaders: [
+    {
+      loader: 'babel-loader',
+      query: {
+        presets: [
+          ['latest', {
+            es2015: {
+              loose: true
+            }
+          }]
+        ],
+        plugins: [
+          'add-module-exports'
+        ]
+      }
+    },
+
+    'eslint-loader'
+  ]
+}
+```
+我们把原来的`loader`字段改成了`loaders`数组, 配置也复杂了许多.
+
+
+## 总结
+通过这篇文章, 我想大家应该学会了webpack的正确打开姿势. 虽然我没有提及如何用webpack来编译[React](https://facebook.github.io/react/)和[vue.js](http://vuejs.org/), 但大家可以想到,
+无非是安装一些loader和plugin来处理[jsx](https://babeljs.io/docs/plugins/preset-react/)和[vue](http://vue-loader.vuejs.org/en/)格式的文件, 那时难度就不在于webpack了, 而是代码架构组织的问题了.
+具体的大家自己去摸索一下. 以后有时间我会把脚手架整理一下放到github上, 供大家参考.
+
+## 版权许可
+本文章采用“保持署名—非商用”创意共享4.0许可证。
+只要保持原作者署名和非商用，您可以自由地阅读、分享、修改本文章。
+详细的法律条文请参见[创意共享](http://creativecommons.org/licenses/by-nc/4.0/)网站。

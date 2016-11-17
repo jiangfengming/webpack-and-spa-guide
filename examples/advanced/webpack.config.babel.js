@@ -23,7 +23,25 @@ export default function(options = {}) {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          loader: 'babel-loader!eslint-loader'
+          loaders: [
+            {
+              loader: 'babel-loader',
+              query: {
+                presets: [
+                  ['latest', {
+                    es2015: {
+                      loose: true
+                    }
+                  }]
+                ],
+                plugins: [
+                  'add-module-exports'
+                ]
+              }
+            },
+
+            'eslint-loader'
+          ]
         },
 
         {
@@ -78,6 +96,12 @@ export default function(options = {}) {
       },
 
       proxy: profile.devServer.proxy
+    },
+
+    resolve: {
+      alias: {
+        src: __dirname + '/src'
+      }
     }
   };
 }
