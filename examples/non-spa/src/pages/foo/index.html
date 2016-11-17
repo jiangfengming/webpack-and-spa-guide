@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <meta name="format-detection" content="telephone=no">
+    <title>foo</title>
+  </head>
+
+  <body>
+    <div class="foo">
+      <pre class="foo__info">
+      </pre>
+
+      <h1>Page Foo</h1>
+      <p>
+        <a href="/bar">goto bar</a>
+      </p>
+      <p>
+        <a href="/bar/baz">goto bar/baz</a>
+      </p>
+
+      <p>
+        <!--
+        小于10kb的图片, <img>标签的src被编译为Data URI格式
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAA...">
+        具体在后面的webpack配置那章讲解
+        -->
+        <img src="smallpic.png">
+      </p>
+
+      <p>
+        <!--
+        大于10kb的图片, 图片会被储存到输出目录, src会被替换为打包后的路径
+        <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
+        -->
+        <img src="largepic.png">
+      </p>
+    </div>
+  </body>
+</html>
