@@ -58,17 +58,12 @@ export default function(options = {}) {
       publicPath: '/assets/'
     },
 
-    /*
-    配置各种类型文件的加载器, 称之为loader
-    webpack当遇到import ... 和 System.import() 时, 会调用这里配置的loader对引用的文件进行编译
-    */
     module: {
       /*
-      当编译一个文件时, webpack会按照 preloaders -> loaders -> import时指定的loader -> postLoaders 这个顺序,
-      依次使用配置的loader处理文件, 一个loader处理返回的结果交给下一个loader处理.
-      一般我们只需要使用到loaders对象
+      配置各种类型文件的加载器, 称之为loader
+      webpack当遇到import ... 和 System.import() 时, 会调用这里配置的loader对引用的文件进行编译
       */
-      loaders: [
+      rules: [
         {
           /*
           使用babel编译ES6/ES7/ES8为ES5代码
@@ -78,11 +73,11 @@ export default function(options = {}) {
           // 排除node_modules目录下的文件, npm安装的包不需要编译
           exclude: /node_modules/,
           /*
-          先使用eslint-loader处理, 返回的结果交给babel-loader处理, loader之间使用!分隔, 从右往左处理.
+          先使用eslint-loader处理, 返回的结果交给babel-loader处理. loader的处理顺序是从最后一个到第一个.
           eslint-loader用来检查代码, 如果有错误, 编译的时候会报错.
           babel-loader用来编译js文件.
           */
-          loader: 'babel-loader!eslint-loader'
+          use: ['babel-loader', 'eslint-loader']
         },
 
         {
@@ -93,9 +88,9 @@ export default function(options = {}) {
           import htmlString from './template.html';
           template.html的文件内容会被转成一个js字符串, 合并到js文件里.
           */
-          loader: 'html-loader',
+          use: 'html-loader',
           // loader可以接受参数, 接受什么参数由各个loader自己定义
-          query: {
+          options: {
             /*
             html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
             比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
@@ -110,10 +105,10 @@ export default function(options = {}) {
             attrs: ['img:src', 'link:href']
           }
           /*
-          query也可以直接跟在loader后面书写, 比如:
-          loader: 'html?attrs[]=img:src&attrs[]=link:href'
+          options也可以直接跟在loader后面书写, 比如:
+          use: 'html?attrs[]=img:src&attrs[]=link:href'
           attrs后面跟[]代表这是一个数组
-          但这样写比较难阅读, 所以我们这里用query对象的方式书写
+          但这样写比较难阅读, 所以我们这里用options对象的方式书写
           */
         },
 
@@ -125,7 +120,7 @@ export default function(options = {}) {
           先使用css-loader处理, 返回的结果交给style-loader处理.
           css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
-          loader: 'style-loader!css-loader'
+          use: ['style-loader', 'css-loader']
         },
 
         {
@@ -144,11 +139,14 @@ export default function(options = {}) {
           <link rel=icon type=image/png href=/assets/favicon.png?f96884e742967916230673fb715ed750>
           可以去掉的双引号也没去掉了.
 
-          file-loader接受一个叫name的参数, 定义输出的文件名. 这里query比较简单, 我们直接写在loader后面.
+          file-loader接受一个叫name的参数, 定义输出的文件名.
           [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
           这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
           */
-          loader: 'file-loader?name=[name].[ext]?[hash]'
+          use: 'file-loader',
+          options: {
+            name: '[name].[ext]?[hash]'
+          }
         },
 
         {
@@ -178,7 +176,10 @@ export default function(options = {}) {
           会被编译成
           <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
           */
-          loader: 'url-loader?limit=10000'
+          use: 'url-loader',
+          options: {
+            limit: 10000
+          }
         }
       ]
     },

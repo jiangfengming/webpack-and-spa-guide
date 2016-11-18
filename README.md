@@ -465,17 +465,12 @@ export default function(options = {}) {
       publicPath: '/assets/'
     },
 
-    /*
-    配置各种类型文件的加载器, 称之为loader
-    webpack当遇到import ... 和 System.import() 时, 会调用这里配置的loader对引用的文件进行编译
-    */
     module: {
       /*
-      当编译一个文件时, webpack会按照 preloaders -> loaders -> import时指定的loader -> postLoaders 这个顺序,
-      依次使用配置的loader处理文件, 一个loader处理返回的结果交给下一个loader处理.
-      一般我们只需要使用到loaders对象
+      配置各种类型文件的加载器, 称之为loader
+      webpack当遇到import ... 和 System.import() 时, 会调用这里配置的loader对引用的文件进行编译
       */
-      loaders: [
+      rules: [
         {
           /*
           使用babel编译ES6/ES7/ES8为ES5代码
@@ -485,11 +480,11 @@ export default function(options = {}) {
           // 排除node_modules目录下的文件, npm安装的包不需要编译
           exclude: /node_modules/,
           /*
-          先使用eslint-loader处理, 返回的结果交给babel-loader处理, loader之间使用!分隔, 从右往左处理.
+          先使用eslint-loader处理, 返回的结果交给babel-loader处理. loader的处理顺序是从最后一个到第一个.
           eslint-loader用来检查代码, 如果有错误, 编译的时候会报错.
           babel-loader用来编译js文件.
           */
-          loader: 'babel-loader!eslint-loader'
+          use: ['babel-loader', 'eslint-loader']
         },
 
         {
@@ -500,9 +495,9 @@ export default function(options = {}) {
           import htmlString from './template.html';
           template.html的文件内容会被转成一个js字符串, 合并到js文件里.
           */
-          loader: 'html-loader',
+          use: 'html-loader',
           // loader可以接受参数, 接受什么参数由各个loader自己定义
-          query: {
+          options: {
             /*
             html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
             比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
@@ -517,10 +512,10 @@ export default function(options = {}) {
             attrs: ['img:src', 'link:href']
           }
           /*
-          query也可以直接跟在loader后面书写, 比如:
-          loader: 'html?attrs[]=img:src&attrs[]=link:href'
+          options也可以直接跟在loader后面书写, 比如:
+          use: 'html?attrs[]=img:src&attrs[]=link:href'
           attrs后面跟[]代表这是一个数组
-          但这样写比较难阅读, 所以我们这里用query对象的方式书写
+          但这样写比较难阅读, 所以我们这里用options对象的方式书写
           */
         },
 
@@ -532,7 +527,7 @@ export default function(options = {}) {
           先使用css-loader处理, 返回的结果交给style-loader处理.
           css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
-          loader: 'style-loader!css-loader'
+          use: ['style-loader', 'css-loader']
         },
 
         {
@@ -551,11 +546,14 @@ export default function(options = {}) {
           <link rel=icon type=image/png href=/assets/favicon.png?f96884e742967916230673fb715ed750>
           可以去掉的双引号也没去掉了.
 
-          file-loader接受一个叫name的参数, 定义输出的文件名. 这里query比较简单, 我们直接写在loader后面.
+          file-loader接受一个叫name的参数, 定义输出的文件名.
           [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
           这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
           */
-          loader: 'file-loader?name=[name].[ext]?[hash]'
+          use: 'file-loader',
+          options: {
+            name: '[name].[ext]?[hash]'
+          }
         },
 
         {
@@ -585,7 +583,10 @@ export default function(options = {}) {
           会被编译成
           <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
           */
-          loader: 'url-loader?limit=10000'
+          use: 'url-loader',
+          options: {
+            limit: 10000
+          }
         }
       ]
     },
@@ -1076,20 +1077,21 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
 
 那么我们怎么babel处理webpack配置文件的`import`和`export`, 但不处理`src`目录中的呢?
 
-一个办法是, 我们可以不修改`package.json`中的配置, 而在`babel-loader`的`query`参数再写一份babel的配置,
-这样, 只有webpack处理的文件会按这份配置的规则处理:
+一个办法是, 我们可以不修改`package.json`中的配置, 而在`babel-loader`的`options`参数再写一份babel的配置,
+这样, 只有webpack处理的文件会按这份配置的规则处理. 我们在这份配置中加入 `modules: false` 参数:
 ```js
 {
   test: /\.js$/,
   exclude: /node_modules/,
-  loaders: [
+  use: [
     {
       loader: 'babel-loader',
-      query: {
+      options: {
         presets: [
           ['latest', {
             es2015: {
-              loose: true
+              loose: true,
+              modules: false
             }
           }]
         ],
@@ -1105,11 +1107,85 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
 ```
 我们把原来的`loader`字段改成了`loaders`数组, 配置也复杂了许多.
 
+## 使用autoprefixer自动创建css的vendor prefixes
+css有一个很麻烦的问题就是比较新的css属性在各个浏览器里是要加前缀的, 我们可以使用[autoprefixer](https://github.com/postcss/autoprefixer)工具自动创建这些浏览器规则,
+那么我们的css中只需要写:
+```css
+:fullscreen a {
+    display: flex
+}
+```
+autoprefixer会编译成:
+```css
+:-webkit-full-screen a {
+    display: -webkit-box;
+    display: flex
+}
+:-moz-full-screen a {
+    display: flex
+}
+:-ms-fullscreen a {
+    display: -ms-flexbox;
+    display: flex
+}
+:fullscreen a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex
+}
+```
+
+首先, 我们用npm安装它:
+```sh
+npm install postcss-loader autoprefixer --save-dev
+```
+autoprefixer是[postcss](http://postcss.org/)的一个插件, 所以我们也要安装postcss的webpack [loader](https://github.com/postcss/postcss-loader).
+
+`webpack.config.babel.js`修改一下:
+```js
+// ...
+
+export default function(options = {}) {
+  // ...
+  return {
+    // ...
+    module: {
+      rules: [
+        // ...
+
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader', 'postcss-loader']
+        },
+
+        // ...
+      ]
+    }
+
+    // ...
+
+  };
+}
+```
+然后创建文件`postcss.config.js`:
+```js
+module.exports = {
+  plugins: [
+    require('autoprefixer')()
+  ]
+};
+```
+你会发现, 这里我们使用了CommonJS规范的模块定义, 因为postcss配置文件不支持使用babel转码...
+因为这个原因, 我们的配置文件中中出了一个CommonJS格式的, 有点不统一. 而且联想到上面的babel配置要在`package.json`和webpack配置中各写一份, 也是很蛋疼. 因此, 我干脆连webpack配置也不用babel转码了, 把`webpack.config.babel.js`改名为`webpack.config.js`,
+然后把`import ...`用`require()`代替, `export ...`用`module.exports = ...`代替. 把`babel-loader`的`options`删除.
+`package.json`中`babel`的配置增加`"modules": false`. `conf`目录下的配置文件也相应改一下. 因为node.js除了ES6模块定义不支持, 其他ES6语法都支持, 因此其他都不用更改.
+
 
 ## 总结
 通过这篇文章, 我想大家应该学会了webpack的正确打开姿势. 虽然我没有提及如何用webpack来编译[React](https://facebook.github.io/react/)和[vue.js](http://vuejs.org/), 但大家可以想到,
 无非是安装一些loader和plugin来处理[jsx](https://babeljs.io/docs/plugins/preset-react/)和[vue](http://vue-loader.vuejs.org/en/)格式的文件, 那时难度就不在于webpack了, 而是代码架构组织的问题了.
 具体的大家自己去摸索一下. 以后有时间我会把脚手架整理一下放到github上, 供大家参考.
+
 
 ## 版权许可
 本文章采用“保持署名—非商用”创意共享4.0许可证。

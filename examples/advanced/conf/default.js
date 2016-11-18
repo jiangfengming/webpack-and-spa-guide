@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   experimentalFeatures: {
     html5player: true,
     featureFoo: false
