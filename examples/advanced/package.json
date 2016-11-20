@@ -5,8 +5,8 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server -d --hot --env.dev --env.profile=$npm_config_profile",
-    "build": "webpack -p --env.profile=$npm_config_profile"
+    "dev": "webpack-dev-server -d --hot --env.dev",
+    "build": "webpack -p"
   },
   "author": "",
   "license": "ISC",

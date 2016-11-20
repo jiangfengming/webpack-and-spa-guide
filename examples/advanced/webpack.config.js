@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const pkgInfo = require('./package.json');
 
 module.exports = function(options = {}) {
-  const profile = require('./conf/' + (options.profile || 'default'));
+  const profile = require('./conf/' + (process.env.npm_config_profile || 'default'));
 
   return {
     entry: {
