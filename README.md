@@ -909,6 +909,15 @@ export default function(options = {}) {
 `pathRewrite`用来改写URL, 这里我们把`/api`前缀去掉.
 
 
+但是, 通过`$npm_config_profile`取环境变量只在macOS/Linux等*nix操作系统有效,
+Windows下`npm run`启动的是Windows的命令行程序`cmd.exe`, 要用`%npm_config_profile%`取环境变量,
+而且当没有传`--profile`参数时, `%npm_config_profile%`会被原样传给webpack, 而不是空字符串.
+因此如果有跨平台需求的话就不能用这个方法了.
+
+那么我们还有一个办法, 就是不改动`package.json`, 只需要在`webpack.config.babel.js`中,
+把`options.profile`改为`process.env.npm_config_profile`就可以了. 因为[process.env](https://nodejs.org/dist/latest-v6.x/docs/api/process.html#process_process_env)也可以拿到环境变量.
+
+
 还有一点, 我们一般不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
 ```
 conf/*
