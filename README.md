@@ -215,7 +215,7 @@ npm install
     "extends": "enough",
     "env": {
       "browser": true,
-      "commonjs": true
+      "node": true
     }
   }
 }
