@@ -49,7 +49,7 @@
     "extends": "enough",
     "env": {
       "browser": true,
-      "commonjs": true
+      "node": true
     },
     "globals": {
       "DEBUG": false,

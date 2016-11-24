@@ -1,10 +1,10 @@
-import webpack from 'webpack';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import glob from 'glob';
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const pkgInfo = require('./package.json');
+const glob = require('glob');
 
-export default function(options = {}) {
-  const profile = require('./conf/' + (options.profile || 'default'));
-  const pkgInfo = require('./package.json');
+module.exports = function(options = {}) {
+  const profile = require('./conf/' + (process.env.npm_config_profile || 'default'));
 
   const entries = glob.sync('./src/**/index.js');
   const entryJsList = {};
@@ -33,53 +33,45 @@ export default function(options = {}) {
     },
 
     module: {
-      loaders: [
+      rules: [
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          loaders: [
-            {
-              loader: 'babel-loader',
-              query: {
-                presets: [
-                  ['latest', {
-                    es2015: {
-                      loose: true
-                    }
-                  }]
-                ],
-                plugins: [
-                  'add-module-exports'
-                ]
-              }
-            },
-
-            'eslint-loader'
-          ]
+          use: ['babel-loader', 'eslint-loader']
         },
 
         {
           test: /\.html$/,
-          loader: 'html-loader',
-          query: {
+          use: 'html-loader',
+          options: {
             attrs: ['img:src', 'link:href']
           }
         },
 
         {
           test: /\.css$/,
-          loader: 'style-loader!css-loader'
+          use: [
+            'style-loader',
+            'css-loader',
+            'postcss-loader'
+          ]
         },
 
         {
           test: /favicon\.png$/,
-          loader: 'file-loader?name=[name].[ext]?[hash]'
+          use: 'file-loader',
+          options: {
+            name: '[name].[ext]?[hash]'
+          }
         },
 
         {
           test: /\.(png|jpg|jpeg|gif|eot|ttf|woff|woff2|svg|svgz)(\?.+)?$/,
           exclude: /favicon\.png$/,
-          loader: 'url-loader?limit=10000'
+          loader: 'url-loader',
+          options: {
+            limit: 10000
+          }
         }
       ]
     },
@@ -112,4 +104,4 @@ export default function(options = {}) {
       }
     }
   };
-}
+};
