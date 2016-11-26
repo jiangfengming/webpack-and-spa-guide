@@ -1190,6 +1190,80 @@ module.exports = {
 `package.json`中`babel`的配置增加`"modules": false`. `conf`目录下的配置文件也相应改一下. 因为node.js除了ES6模块定义不支持, 其他ES6语法都支持, 因此其他都不用更改.
 
 
+## 非SPA的展示型网页能否用webpack打包?
+对于展示型网页, 我们最多的是用Grunt或Gulp来打包, 因为这种简单的页面对模块化编程的需求不高. 但如果你喜欢上使用`import`来引入库,
+那么我们仍然可以使用webpack来打包展示型网页.
+
+非SPA的页面意味着并没有一个单一的html入口和js入口, 而是每个页面对应一个html和多个js. 那么我们可以把项目结构设计为:
+```
+├── dist                      
+├── package.json              
+├── node_modules              
+├── src                       
+│   ├── components            
+│   ├── libs                  
+|   ├── favicon.png
+|   ├── vendor.js             所有页面公用的第三方库
+│   └── pages                 页面放这里
+|       ├── foo               编译后生成 http://localhost:8010/foo.html
+|       |    ├── index.html
+|       |    ├── index.js
+|       |    ├── style.css
+|       |    └── pic.png
+|       └── bar               http://localhost:8010/bar.html
+|           ├── index.html
+|           ├── index.js
+|           ├── style.css
+|           └── baz           http://localhost:8010/bar/baz.html
+|               ├── index.html
+|               ├── index.js
+|               └── style.css
+└── webpack.config.js         
+```
+这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理.
+`index.js`是每个页面的业务逻辑, 全部作为入口js配置到`entry`中. 页面公用的第三方库仍然打包进`vendor.js`.
+这里我们需要用`glob`库来把这些文件都筛选出来批量操作.
+```sh
+npm install glob --save-dev
+```
+
+`webpack.config.js`修改的地方:
+```js
+// ...
+const glob = require('glob');
+
+module.exports = function(options = {}) {
+  // ...
+
+  const entries = glob.sync('./src/**/index.js');
+  const entryJsList = {};
+  const entryHtmlList = [];
+  for (const path of entries) {
+    const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length);
+    entryJsList[chunkName] = path;
+    entryHtmlList.push(new HtmlWebpackPlugin({
+      template: path.replace('index.js', 'index.html'),
+      filename: chunkName + '.html',
+      chunks: ['manifest', 'vendor', chunkName],
+      favicon: './src/favicon.png'
+    }));
+  }
+
+  return {
+    entry: Object.assign({
+      vendor: './src/vendor'
+    }, entryJsList),
+
+    // ...
+
+    plugins: [
+      ...entryHtmlList,
+      // ...
+    ]
+  };
+};
+```
+
 ## 总结
 通过这篇文章, 我想大家应该学会了webpack的正确打开姿势. 虽然我没有提及如何用webpack来编译[React](https://facebook.github.io/react/)和[vue.js](http://vuejs.org/), 但大家可以想到,
 无非是安装一些loader和plugin来处理[jsx](https://babeljs.io/docs/plugins/preset-react/)和[vue](http://vue-loader.vuejs.org/en/)格式的文件, 那时难度就不在于webpack了, 而是代码架构组织的问题了.

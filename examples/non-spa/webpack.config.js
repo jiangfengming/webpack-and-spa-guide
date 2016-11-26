@@ -29,7 +29,7 @@ module.exports = function(options = {}) {
       path: __dirname + '/dist',
       filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
       chunkFilename: '[id].js?[chunkhash]',
-      publicPath: '/assets/'
+      publicPath: '/'
     },
 
     module: {
