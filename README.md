@@ -495,28 +495,29 @@ export default function(options = {}) {
           import htmlString from './template.html';
           template.html的文件内容会被转成一个js字符串, 合并到js文件里.
           */
-          use: 'html-loader',
-          // loader可以接受参数, 接受什么参数由各个loader自己定义
-          options: {
+          use: [
             /*
-            html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
-            比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
-
-            <link>标签的href属性, 我们用来打包入口index.html引入的favicon.png文件.
-            反应快的同学可能会问作为入口的html并没有任何js去import它, 而且转成js字符串了也没法用浏览器打开啊?
-            是的, 入口html的处理有点特殊, 我们在下面的plugins段落详细介绍
-
-            那么这些资源文件的打包用什么loader处理呢? 同样是在loaders配置中指定, 我们会在下面看到.
-            如果html-loader不指定attrs参数, 默认值是img:src, 意味着会默认打包<img>标签的图片
+            loader可以接受参数, 接受什么参数由各个loader自己定义
+            如果loader需要接受options参数, 则需要写成对象格式
             */
-            attrs: ['img:src', 'link:href']
-          }
-          /*
-          options也可以直接跟在loader后面书写, 比如:
-          use: 'html?attrs[]=img:src&attrs[]=link:href'
-          attrs后面跟[]代表这是一个数组
-          但这样写比较难阅读, 所以我们这里用options对象的方式书写
-          */
+            {
+              loader: 'html-loader',
+              options: {
+                /*
+                html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
+                比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
+
+                <link>标签的href属性, 我们用来打包入口index.html引入的favicon.png文件.
+                反应快的同学可能会问作为入口的html并没有任何js去import它, 而且转成js字符串了也没法用浏览器打开啊?
+                是的, 入口html的处理有点特殊, 我们在下面的plugins段落详细介绍
+
+                那么这些资源文件的打包用什么loader处理呢? 同样是在loaders配置中指定, 我们会在下面看到.
+                如果html-loader不指定attrs参数, 默认值是img:src, 意味着会默认打包<img>标签的图片
+                */
+                attrs: ['img:src', 'link:href']
+              }
+            }
+          ]
         },
 
         {
@@ -525,7 +526,8 @@ export default function(options = {}) {
 
           /*
           先使用css-loader处理, 返回的结果交给style-loader处理.
-          css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
+          css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片,
+          字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
           use: ['style-loader', 'css-loader']
         },
@@ -550,10 +552,14 @@ export default function(options = {}) {
           [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
           这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
           */
-          use: 'file-loader',
-          options: {
-            name: '[name].[ext]?[hash]'
-          }
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]?[hash]'
+              }
+            }
+          ]
         },
 
         {
@@ -583,10 +589,14 @@ export default function(options = {}) {
           会被编译成
           <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
           */
-          use: 'url-loader',
-          options: {
-            limit: 10000
-          }
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 10000
+              }
+            }
+          ]
         }
       ]
     },
@@ -613,7 +623,12 @@ export default function(options = {}) {
 
         html-webpack-plugin也可以不指定template参数, 它会使用默认的模板html.
         还有favicon参数指定favicon文件路径, 会自动打包插入到html文件中.
-        但这些参数一般无法满足实际需求, 比如移动端的特殊meta字段和不同尺寸的favicon等, 因此不如还是自己写一个html
+        但它有个bug, 打包后的文件名路径不带hash:
+        https://github.com/ampedandwired/html-webpack-plugin/issues/364
+        就算有hash, 它也是[hash], 而不是[chunkhash], 导致修改代码也会改变favicon打包输出的文件名.
+        还有移动端的meta字段和不同尺寸的favicon等, 因此综合考虑还是自己写一个html
+
+        那个issue中提交的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
         */
         template: 'src/index.html'
       })
@@ -692,7 +707,6 @@ webpack: bundle is now VALID.
   "name": "simple",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server -d --hot --env.dev",
     "build": "webpack -p"
   }
@@ -1012,14 +1026,41 @@ import b from '../../../components/b';
 ```js
 resolve: {
   alias: {
-    src: __dirname + '/src'
+    '~': __dirname + '/src'
   }
 }
 ```
-这样, 我们可以从`src`为基础路径来`import`文件:
+这样, 我们可以从`~`为基础路径来`import`文件:
 ```js
-import b from 'src/components/b';
+import b from '~/components/b';
 ```
+
+html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`root`参数, 可以使`/`开头的文件相对于`root`目录解析.
+```js
+{
+  test: /\.html$/,
+  use: [
+    {
+      loader: 'html-loader',
+      options: {
+        root: __dirname + '/src',
+        attrs: ['img:src', 'link:href']
+      }
+    }
+  ]
+}
+```
+那么, `<img src="/favicon.png">`就能顺利指向到src目录下的favicon.png文件, 不需要关心当前文件和目标文件的相对路径.
+
+PS: 在调试<img>标签的时候遇到一个坑, `htlm-loader`会解析`<!-- -->`注释中的内容, 之前在注释中写的
+```html
+<!--
+大于10kb的图片, 图片会被储存到输出目录, src会被替换为打包后的路径
+<img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
+-->
+```
+之前因为没有加`root`参数, 所以`/`开头的文件名不会被解析, 加了`root`导致编译时报错, 找不到该文件. 大家记住这一点.
+
 
 ## 改进System.import()和require()
 我们已经知道, 当使用System.import()和require()引入文件时, export default ... 的东西是被赋值到`.default`属性下的.
@@ -1190,6 +1231,23 @@ module.exports = {
 `package.json`中`babel`的配置增加`"modules": false`. `conf`目录下的配置文件也相应改一下. 因为node.js除了ES6模块定义不支持, 其他ES6语法都支持, 因此其他都不用更改.
 
 
+## 编译前清空dist目录
+不清空的话上次编译生成的文件会遗留在dist目录中, 我们最好先把目录清空一下.
+macOS/Linux下可以用`rm -rf dist`搞定, 考虑到跨平台的需求, 我们可以用`rimraf`:
+```sh
+npm install rimraf --save-dev
+```
+`package.json`修改一下:
+```json
+{
+  "scripts": {
+    "dev": "webpack-dev-server -d --hot --env.dev",
+    "build": "rimraf dist && webpack -p"
+  },
+}
+```
+
+
 ## 非SPA的展示型网页能否用webpack打包?
 对于展示型网页, 我们最多的是用Grunt或Gulp来打包, 因为这种简单的页面对模块化编程的需求不高. 但如果你喜欢上使用`import`来引入库,
 那么我们仍然可以使用webpack来打包展示型网页.
@@ -1244,8 +1302,7 @@ module.exports = function(options = {}) {
     entryHtmlList.push(new HtmlWebpackPlugin({
       template: path.replace('index.js', 'index.html'),
       filename: chunkName + '.html',
-      chunks: ['manifest', 'vendor', chunkName],
-      favicon: './src/favicon.png'
+      chunks: ['manifest', 'vendor', chunkName]
     }));
   }
 

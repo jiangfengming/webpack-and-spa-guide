@@ -88,28 +88,29 @@ export default function(options = {}) {
           import htmlString from './template.html';
           template.html的文件内容会被转成一个js字符串, 合并到js文件里.
           */
-          use: 'html-loader',
-          // loader可以接受参数, 接受什么参数由各个loader自己定义
-          options: {
+          use: [
             /*
-            html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
-            比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
-
-            <link>标签的href属性, 我们用来打包入口index.html引入的favicon.png文件.
-            反应快的同学可能会问作为入口的html并没有任何js去import它, 而且转成js字符串了也没法用浏览器打开啊?
-            是的, 入口html的处理有点特殊, 我们在下面的plugins段落详细介绍
-
-            那么这些资源文件的打包用什么loader处理呢? 同样是在loaders配置中指定, 我们会在下面看到.
-            如果html-loader不指定attrs参数, 默认值是img:src, 意味着会默认打包<img>标签的图片
+            loader可以接受参数, 接受什么参数由各个loader自己定义
+            如果loader需要接受options参数, 则需要写成对象格式
             */
-            attrs: ['img:src', 'link:href']
-          }
-          /*
-          options也可以直接跟在loader后面书写, 比如:
-          use: 'html?attrs[]=img:src&attrs[]=link:href'
-          attrs后面跟[]代表这是一个数组
-          但这样写比较难阅读, 所以我们这里用options对象的方式书写
-          */
+            {
+              loader: 'html-loader',
+              options: {
+                /*
+                html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包
+                比如这里<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径
+
+                <link>标签的href属性, 我们用来打包入口index.html引入的favicon.png文件.
+                反应快的同学可能会问作为入口的html并没有任何js去import它, 而且转成js字符串了也没法用浏览器打开啊?
+                是的, 入口html的处理有点特殊, 我们在下面的plugins段落详细介绍
+
+                那么这些资源文件的打包用什么loader处理呢? 同样是在loaders配置中指定, 我们会在下面看到.
+                如果html-loader不指定attrs参数, 默认值是img:src, 意味着会默认打包<img>标签的图片
+                */
+                attrs: ['img:src', 'link:href']
+              }
+            }
+          ]
         },
 
         {
@@ -118,7 +119,8 @@ export default function(options = {}) {
 
           /*
           先使用css-loader处理, 返回的结果交给style-loader处理.
-          css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片, 字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
+          css-loader将css内容存为js字符串, 并且会把background, @font-face等引用的图片,
+          字体文件交给指定的loader打包, 类似上面的html-loader, 用什么loader同样在loaders对象中定义, 等会下面就会看到.
           */
           use: ['style-loader', 'css-loader']
         },
@@ -143,10 +145,14 @@ export default function(options = {}) {
           [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
           这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
           */
-          use: 'file-loader',
-          options: {
-            name: '[name].[ext]?[hash]'
-          }
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]?[hash]'
+              }
+            }
+          ]
         },
 
         {
@@ -176,10 +182,14 @@ export default function(options = {}) {
           会被编译成
           <img src="/assets/f78661bef717cf2cc2c2e5158f196384.png">
           */
-          use: 'url-loader',
-          options: {
-            limit: 10000
-          }
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 10000
+              }
+            }
+          ]
         }
       ]
     },
@@ -206,7 +216,12 @@ export default function(options = {}) {
 
         html-webpack-plugin也可以不指定template参数, 它会使用默认的模板html.
         还有favicon参数指定favicon文件路径, 会自动打包插入到html文件中.
-        但这些参数一般无法满足实际需求, 比如移动端的特殊meta字段和不同尺寸的favicon等, 因此不如还是自己写一个html
+        但它有个bug, 打包后的文件名路径不带hash:
+        https://github.com/ampedandwired/html-webpack-plugin/issues/364
+        就算有hash, 它也是[hash], 而不是[chunkhash], 导致修改代码也会改变favicon打包输出的文件名.
+        还有移动端的meta字段和不同尺寸的favicon等, 因此综合考虑还是自己写一个html
+
+        那个issue中提交的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
         */
         template: 'src/index.html'
       })
