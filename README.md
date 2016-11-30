@@ -405,7 +405,7 @@ npm install babel-preset-es2015 --save-dev
 我们来创建webpack配置文件`webpack.config.babel.js`, 这里文件名里有`babel`, webpack会识别配置文件里的ES6语法.
 我们来看文件内容:
 ```js
-// 导入html-webpack-plugin
+import { resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 /*
@@ -427,7 +427,7 @@ export default function(options = {}) {
     // 配置打包输出相关
     output: {
       // 打包输出目录
-      path: __dirname + '/dist',
+      path: resolve(__dirname, 'dist'),
 
       /*
       entry字段配置的入口js的打包输出文件名
@@ -630,7 +630,7 @@ export default function(options = {}) {
 
         那个issue中提交的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
         */
-        template: 'src/index.html'
+        template: './src/index.html'
       })
     ],
 
@@ -1026,7 +1026,7 @@ import b from '../../../components/b';
 ```js
 resolve: {
   alias: {
-    '~': __dirname + '/src'
+    '~': resolve(__dirname, 'src')
   }
 }
 ```
@@ -1043,7 +1043,7 @@ html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`r
     {
       loader: 'html-loader',
       options: {
-        root: __dirname + '/src',
+        root: resolve(__dirname, 'src'),
         attrs: ['img:src', 'link:href']
       }
     }

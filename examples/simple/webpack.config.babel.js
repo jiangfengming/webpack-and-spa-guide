@@ -1,4 +1,4 @@
-// 导入html-webpack-plugin
+import { resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 /*
@@ -20,7 +20,7 @@ export default function(options = {}) {
     // 配置打包输出相关
     output: {
       // 打包输出目录
-      path: __dirname + '/dist',
+      path: resolve(__dirname, 'dist'),
 
       /*
       entry字段配置的入口js的打包输出文件名
@@ -223,7 +223,7 @@ export default function(options = {}) {
 
         那个issue中提交的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
         */
-        template: 'src/index.html'
+        template: './src/index.html'
       })
     ],
 

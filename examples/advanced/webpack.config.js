@@ -1,3 +1,4 @@
+const { resolve } = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const pkgInfo = require('./package.json');
@@ -12,7 +13,7 @@ module.exports = function(options = {}) {
     },
 
     output: {
-      path: __dirname + '/dist',
+      path: resolve(__dirname, 'dist'),
       filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
       chunkFilename: '[id].js?[chunkhash]',
       publicPath: '/assets/'
@@ -32,7 +33,7 @@ module.exports = function(options = {}) {
             {
               loader: 'html-loader',
               options: {
-                root: __dirname + '/src',
+                root: resolve(__dirname, 'src'),
                 attrs: ['img:src', 'link:href']
               }
             }
@@ -101,7 +102,7 @@ module.exports = function(options = {}) {
 
     resolve: {
       alias: {
-        '~': __dirname + '/src'
+        '~': resolve(__dirname, 'src')
       }
     }
   };
