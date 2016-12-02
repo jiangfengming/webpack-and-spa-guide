@@ -3,7 +3,7 @@
 ![webpack](assets/webpack.png)
 
 ## 写在开头
-先说说为什么要写这篇文章, 最初的原因是组里的小朋友们看了[webpack](http://webpack.github.io/)文档后,
+先说说为什么要写这篇文章, 最初的原因是组里的小朋友们看了[webpack](https://webpack.js.org/)文档后,
 表情都是这样的: (摘自webpack[一篇文档](http://webpack.github.io/docs/usage.html)的评论区)
 
 ![WTF](assets/wtf.jpg)
@@ -281,7 +281,7 @@ class Router {
   load(path) {
     // 使用System.import将加载的js文件分开打包, 这样实现了仅加载访问的页面
     // https://gist.github.com/sokra/27b24881210b56bbaff7#code-splitting-with-es6
-    // http://webpack.github.io/docs/code-splitting.html
+    // https://webpack.js.org/guides/code-splitting/
     System.import('./views' + path + '/index.js').then(module => {
       // 加载的js文件通过 export default ... 导出的东西会被赋值为module.default
       const View = module.default;
@@ -346,7 +346,7 @@ npm show webpack versions --json
 ```
 最后一个就是了.
 
-[webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试,
+[webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试,
 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.
 
 [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin),
@@ -451,7 +451,7 @@ export default function(options = {}) {
       我们称每一个输出的文件为一个chunk. 使用System.import()加载的文件会被分开打包生成一个chunk,
       chunkFilename用来配置这个chunk输出的文件名.
       [id]: 编译时每个chunk会有一个id. 这里也可以用[name], 但[name]一般是空的, 此时它等于[id],
-      除非使用require.ensure()指定第三个参数: http://webpack.github.io/docs/code-splitting.html#named-chunks
+      除非使用require.ensure()指定第三个参数: https://webpack.js.org/guides/code-splitting-require/#chunkname
       因为一般没必要指定name, 而且System.import()不支持. 所以就没什么意义了.
       */
       chunkFilename: '[id].js?[chunkhash]',
