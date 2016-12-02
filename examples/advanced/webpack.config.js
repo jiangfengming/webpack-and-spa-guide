@@ -84,10 +84,7 @@ module.exports = function(options = {}) {
       new webpack.DefinePlugin({
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
-        CONFIG: JSON.stringify({
-          experimentalFeatures: config.experimentalFeatures,
-          thirdPartyApiKey: config.thirdPartyApiKey
-        })
+        CONFIG: JSON.stringify(config.runtimeConfig)
       })
     ],
 

@@ -1,10 +1,12 @@
 module.exports = {
-  experimentalFeatures: {
-    html5player: true,
-    featureFoo: false
-  },
+  runtimeConfig: {
+    experimentalFeatures: {
+      html5player: true,
+      featureFoo: false
+    },
 
-  thirdPartyApiKey: 'abcdefg123456',
+    thirdPartyApiKey: 'abcdefg123456'
+  },
 
   devServer: {
     port: 8010,
