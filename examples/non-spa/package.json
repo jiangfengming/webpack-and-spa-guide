@@ -13,7 +13,6 @@
     "autoprefixer": "^6.5.3",
     "babel-core": "^6.18.2",
     "babel-loader": "^6.2.7",
-    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-latest": "^6.16.0",
     "css-loader": "^0.26.0",
     "eslint": "^3.11.1",
@@ -36,13 +35,11 @@
         "latest",
         {
           "es2015": {
-            "loose": true
+            "loose": true,
+            "modules": false
           }
         }
       ]
-    ],
-    "plugins": [
-      "add-module-exports"
     ]
   },
   "eslintConfig": {

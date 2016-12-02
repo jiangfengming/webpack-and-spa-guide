@@ -1062,38 +1062,6 @@ PS: 在调试<img>标签的时候遇到一个坑, `htlm-loader`会解析`<!-- --
 之前因为没有加`root`参数, 所以`/`开头的文件名不会被解析, 加了`root`导致编译时报错, 找不到该文件. 大家记住这一点.
 
 
-## 改进System.import()和require()
-我们已经知道, 当使用System.import()和require()引入文件时, export default ... 的东西是被赋值到`.default`属性下的.
-这样一来看起来丑, 二来经常会忘记, 我们可以用一个babel插件来改进这个小问题:
-```sh
-npm install babel-plugin-add-module-exports --save-dev
-```
-然后`package.json`中babel的配置加入这个插件:
-```json
-{
-  "babel": {
-    "presets": [
-      "latest"
-    ],
-    "plugins": [
-      "add-module-exports"
-    ]
-  }
-}
-```
-这样我们就不用写`.default`了, 比如webpack中引入自定义配置:
-```js
-const profile = require('./conf/' + (options.profile || 'default'));
-```
-
-入口index.js文件中引入页面js:
-```js
-System.import('./views' + location.path + '/index.js').then(View => {
-  const view = new View();
-  view.mount(document.body);
-});
-```
-
 ## 优化babel编译后的代码的性能
 babel编译后的代码一般会造成性能损失, babel提供了一个[loose](http://www.2ality.com/2015/12/babel6-loose-mode.html)选项,
 使编译后的代码不需要完全遵循ES6规定, 简化编译后的代码, 提高代码执行效率:
@@ -1109,9 +1077,6 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
           }
         }
       ]
-    ],
-    "plugins": [
-      "add-module-exports"
     ]
   }
 }
@@ -1144,9 +1109,6 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
               modules: false
             }
           }]
-        ],
-        plugins: [
-          'add-module-exports'
         ]
       }
     },
@@ -1155,7 +1117,6 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
   ]
 }
 ```
-我们把原来的`loader`字段改成了`loaders`数组, 配置也复杂了许多.
 
 ## 使用autoprefixer自动创建css的vendor prefixes
 css有一个很麻烦的问题就是比较新的css属性在各个浏览器里是要加前缀的, 我们可以使用[autoprefixer](https://github.com/postcss/autoprefixer)工具自动创建这些浏览器规则,
