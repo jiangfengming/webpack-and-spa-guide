@@ -929,7 +929,7 @@ export default function(options = {}) {
       new webpack.DefinePlugin({
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
-        CONF: JSON.stringify(config.runtimeConfig)
+        CONFIG: JSON.stringify(config.runtimeConfig)
       })
     ]
   }
