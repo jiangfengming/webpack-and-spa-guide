@@ -5,7 +5,7 @@ const pkgInfo = require('./package.json');
 const glob = require('glob');
 
 module.exports = function(options = {}) {
-  const profile = require('./conf/' + (process.env.npm_config_profile || 'default'));
+  const config = require('./config/' + (process.env.npm_config_config || 'default'));
 
   const entries = glob.sync('./src/**/index.js');
   const entryJsList = {};
@@ -95,16 +95,17 @@ module.exports = function(options = {}) {
       new webpack.DefinePlugin({
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
-        CONF: JSON.stringify({
-          experimentalFeatures: profile.experimentalFeatures,
-          thirdPartyApiKey: profile.thirdPartyApiKey
+        CONFIG: JSON.stringify({
+          experimentalFeatures: config.experimentalFeatures,
+          thirdPartyApiKey: config.thirdPartyApiKey
         })
       })
     ],
 
     devServer: {
-      port: profile.devServer.port,
-      proxy: profile.devServer.proxy
+      host: '0.0.0.0',
+      port: config.devServer.port,
+      proxy: config.devServer.proxy
     },
 
     resolve: {

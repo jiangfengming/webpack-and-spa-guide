@@ -50,7 +50,7 @@
     "globals": {
       "DEBUG": false,
       "VERSION": false,
-      "CONF": false
+      "CONFIG": false
     }
   },
   "dependencies": {

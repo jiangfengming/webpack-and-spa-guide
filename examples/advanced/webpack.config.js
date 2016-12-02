@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const pkgInfo = require('./package.json');
 
 module.exports = function(options = {}) {
-  const profile = require('./conf/' + (process.env.npm_config_profile || 'default'));
+  const config = require('./config/' + (process.env.npm_config_config || 'default'));
 
   return {
     entry: {
@@ -84,20 +84,21 @@ module.exports = function(options = {}) {
       new webpack.DefinePlugin({
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
-        CONF: JSON.stringify({
-          experimentalFeatures: profile.experimentalFeatures,
-          thirdPartyApiKey: profile.thirdPartyApiKey
+        CONFIG: JSON.stringify({
+          experimentalFeatures: config.experimentalFeatures,
+          thirdPartyApiKey: config.thirdPartyApiKey
         })
       })
     ],
 
     devServer: {
-      port: profile.devServer.port,
+      host: '0.0.0.0',
+      port: config.devServer.port,
       historyApiFallback: {
         index: '/assets/'
       },
 
-      proxy: profile.devServer.proxy
+      proxy: config.devServer.proxy
     },
 
     resolve: {

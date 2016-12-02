@@ -9,13 +9,13 @@ export default class {
 
     console.log(DEBUG);
     console.log(VERSION);
-    console.log(CONF);
+    console.log(CONFIG);
 
     container.innerHTML = `
       <pre>
       DEBUG: ${DEBUG}
       VERSION: ${VERSION}
-      CONF: ${JSON.stringify(CONF, null, 2)}
+      CONFIG: ${JSON.stringify(CONFIG, null, 2)}
       </pre>
       ${template}
     `;

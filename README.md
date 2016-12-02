@@ -837,31 +837,12 @@ export default function(options = {}) {
 ```
 
 ### 执行命令行时可以自定义部分参数
-我们可以想到, 通过在命令行带入参数, 我们可以在webpack中引入指定的配置文件:
+当我们通过`npm run`执行脚本的时候, 可以传自定义的参数:
 ```sh
-./node_modules/.bin/webpack-dev-server -d --hot --env.dev --env.profile=myprofile
+npm run dev --config=myconfig
 ```
 
-当我们通过`npm run`执行脚本的时候, 往命令中传参的写法是这样的:
-```sh
-npm run dev --profile=myprofile
-```
-
-`package.json`也需要做相应修改:
-```json
-{
-  "name": "advanced",
-  "version": "1.0.0",
-
-  "scripts": {
-    "dev": "webpack-dev-server -d --hot --env.dev --env.profile=$npm_config_profile",
-    "build": "webpack -p --env.profile=$npm_config_profile"
-  }
-}
-```
-这里的关键是`npm run`传的`--profile`参数可以通过`$npm_config_profile`拿到.
-
-我们在项目根目录建立一个文件夹`conf`, 里面创建`default.js`:
+我们在项目根目录建立一个文件夹`config`, 里面创建`default.js`:
 ```js
 export default {
   server: {
@@ -883,54 +864,46 @@ export default {
 };
 ```
 
-`default.js`作为不传profile参数时的默认配置, 然后我们创建`myprofile.js`:
+`default.js`作为不传config参数时的默认配置, 然后我们创建`myconfig.js`:
 ```js
-import conf from './default';
-conf.devServer.port = 8020;
-export default conf;
+import config from './default';
+config.devServer.port = 8020;
+export default config;
 ```
-`myprofile.js`引用默认配置, 修改`port`为`8020`.
+`myconfig.js`引用默认配置, 修改`port`为`8020`.
 
 然后在`webpack.config.babel.js`中, 我们相应的修改一下导出的函数:
 ```js
 export default function(options = {}) {
   // require()和System.import()一样, export default ... 的东西被赋值到了default属性中
-  const profile = require('./conf/' + (options.profile || 'default')).default;
+  const config = require('./config/' + (process.env.npm_config_config || 'default')).default;
 
   return {
     // ...省略未改动部分
 
     devServer: {
-      port: profile.devServer.port,
+      port: config.devServer.port,
       historyApiFallback: {
         index: '/assets/'
       },
 
-      proxy: profile.devServer.proxy
+      proxy: config.devServer.proxy
     }
   }
 }
 ```
+这里的关键是`npm run`传进来的自定义参数可以通过`process.env.npm_config_*`获得. 参数中如果有`-`会被转成`_`
+
 这样, 我们就实现了不同的人或者环境, 自定义部分参数.
 
 这里我们需要用require()来动态加载js文件, 因为import不支持动态加载, System.import()是异步加载, 不方便.
 
-`profile.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
+`config.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
 `/api/pay/*`的请求会被转发到 `http://api.example.dev/pay/*`.
 
 `changeOrigin`会修改HTTP请求头中的`Host`为`target`的域名, 这里会被改为`api.example.dev`
 
 `pathRewrite`用来改写URL, 这里我们把`/api`前缀去掉.
-
-
-但是, 通过`$npm_config_profile`取环境变量只在macOS/Linux等*nix操作系统有效,
-Windows下`npm run`启动的是Windows的命令行程序`cmd.exe`, 要用`%npm_config_profile%`取环境变量,
-而且当没有传`--profile`参数时, `%npm_config_profile%`会被原样传给webpack, 而不是空字符串.
-因此如果有跨平台需求的话就不能用这个方法了.
-
-那么我们还有一个办法, 就是不改动`package.json`, 只需要在`webpack.config.babel.js`中,
-把`options.profile`改为`process.env.npm_config_profile`就可以了. 因为[process.env](https://nodejs.org/dist/latest-v6.x/docs/api/process.html#process_process_env)也可以拿到环境变量.
-
 
 还有一点, 我们一般不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
 ```
@@ -944,7 +917,7 @@ conf/*
 这里我们用到了[DefinePlugin](http://webpack.github.io/docs/list-of-plugins.html#defineplugin)插件.
 ```js
 export default function(options = {}) {
-  const profile = require('./conf/' + (options.profile || 'default')).default;
+  const config = require('./conf/' + (process.env.npm_config_config || 'default')).default;
   const pkgInfo = require('./package.json');
 
   return {
@@ -957,8 +930,8 @@ export default function(options = {}) {
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
         CONF: JSON.stringify({
-          experimentalFeatures: profile.experimentalFeatures,
-          thirdPartyApiKey: profile.thirdPartyApiKey
+          experimentalFeatures: config.experimentalFeatures,
+          thirdPartyApiKey: config.thirdPartyApiKey
         })
       })
     ]
@@ -1207,6 +1180,10 @@ npm install rimraf --save-dev
   },
 }
 ```
+
+
+## 开发环境允许其他电脑访问
+`webpack.config.js`中`devServer.host`设置为`'0.0.0.0'`即可.
 
 
 ## 非SPA的展示型网页能否用webpack打包?

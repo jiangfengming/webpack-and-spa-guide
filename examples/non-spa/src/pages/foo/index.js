@@ -5,10 +5,10 @@ import './style.css';
 
 console.log(DEBUG);
 console.log(VERSION);
-console.log(CONF);
+console.log(CONFIG);
 
 $('.foo__info').html(`
   DEBUG: ${DEBUG}
   VERSION: ${VERSION}
-  CONF: ${JSON.stringify(CONF, null, 2)}
+  CONFIG: ${JSON.stringify(CONFIG, null, 2)}
 `);
