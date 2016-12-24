@@ -1,1 +1,1 @@
-import 'spa-history';
+import 'spa-history'

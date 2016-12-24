@@ -1,15 +1,15 @@
 /* eslint no-console: "off" */
 
-import template from './index.html';
-import './style.css';
+import template from './index.html'
+import './style.css'
 
 export default class {
   mount(container) {
-    document.title = 'foo';
+    document.title = 'foo'
 
-    console.log(DEBUG);
-    console.log(VERSION);
-    console.log(CONFIG);
+    console.log(DEBUG)
+    console.log(VERSION)
+    console.log(CONFIG)
 
     container.innerHTML = `
       <pre>
@@ -18,6 +18,6 @@ export default class {
       CONFIG: ${JSON.stringify(CONFIG, null, 2)}
       </pre>
       ${template}
-    `;
+    `
   }
 }
