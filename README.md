@@ -1641,7 +1641,7 @@ module.exports = (options = {}) => {
 
 
 ## 几个脚手架
-* [vue boilerplate](https://github.com/fenivana/vue-boilerplate)
+* [Vue Boilerplate](https://github.com/fenivana/vue-boilerplate)
 * [Vue SSR Boilerplate](https://github.com/fenivana/vue-ssr-boilerplate)
 
 
