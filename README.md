@@ -243,13 +243,20 @@ npm install
 业界最有名的语法规范是[airbnb](https://github.com/airbnb/javascript)出品的, 但它规定的太死板了,
 比如不允许使用`for-of`和`for-in`等. 感兴趣的同学可以参照[这里](https://www.npmjs.com/package/eslint-config-airbnb)安装使用.
 
-项目里安装了eslint还没用, 我们的IDE和编辑器也得要装eslint插件支持它. [atom](https://atom.io/)需要安装[linter](https://atom.io/packages/linter)和[linter-eslint](https://atom.io/packages/linter-eslint)这两个插件,
-装好后重启生效. [WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
+[eslint-loader](https://github.com/MoOx/eslint-loader)用于在webpack编译的时候检查代码,
+如果有错误, webpack会报错.
+
+项目里安装了eslint还没用, 我们的IDE和编辑器也得要装eslint插件支持它.
+
+[Visual Studio Code](https://code.visualstudio.com/)需要安装[ESLint扩展](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+
+[atom](https://atom.io/)需要安装[linter](https://atom.io/packages/linter)和[linter-eslint](https://atom.io/packages/linter-eslint)这两个插件,
+装好后重启生效.
+
+[WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开eslint开关:
 
 ![WebStorm ESLint Config](assets/webstorm-eslint-config.png)
 
-[eslint-loader](https://github.com/MoOx/eslint-loader)用于在webpack编译的时候检查代码,
-如果有错误, webpack会报错.
 
 ### 写几个页面
 我们写一个最简单的SPA应用来介绍SPA应用的内部工作原理.
