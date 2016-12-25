@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "dev": "webpack-dev-server -d --hot --env.dev",
-    "build": "rimraf dist && webpack -p"
+    "build": "rimraf dist && webpack -p --env.config production"
   },
   "author": "",
   "license": "ISC",

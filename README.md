@@ -52,32 +52,32 @@ mac/linux上搞个bash脚本, 哪几个文件要合并在一块的, 哪几个要
 恰好就在这个时候(2009年), 随着后端JavaScript技术的发展, 人们提出了[CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1.1)的模块化规范, 大概的语法是: 如果`a.js`依赖`b.js`和`c.js`, 那么就在`a.js`的头部, 引入这些依赖文件:
 
 ```js
-var b = require('./b');
-var c = require('./c');
+var b = require('./b')
+var c = require('./c')
 ```
 
 那么变量`b`和`c`会是什么呢? 那就是`b.js`和`c.js`导出的东西, 比如`b.js`可以这样导出:
 
 ```js
 exports.square = function(num) {
-  return num * num;
-};
+  return num * num
+}
 ```
 
 然后就可以在`a.js`使用这个`square`方法:
 
 ```js
-var n = b.square(2);
+var n = b.square(2)
 ```
 
 如果`c.js`依赖`d.js`, 导出的是一个`Number`, 那么可以这样写:
 
 ```js
-var d = require('./d');
-module.exports = d.PI; // 假设d.PI的值是3.14159
+var d = require('./d')
+module.exports = d.PI // 假设d.PI的值是3.14159
 ```
 
-那么`a.js`中的变量`c`就是数字`3.14159`;
+那么`a.js`中的变量`c`就是数字`3.14159`
 具体的语法规范可以查看Node.js的[文档](https://nodejs.org/dist/latest-v6.x/docs/api/modules.html).
 
 
@@ -87,17 +87,17 @@ module.exports = d.PI; // 假设d.PI的值是3.14159
 
 ```js
 require(['./b', './c'], function(b, c) {
-  var n = b.square(2);
-  console.log(c); // 3.14159
-});
+  var n = b.square(2)
+  console.log(c) // 3.14159
+})
 ```
 
 相应的导出语法也是异步回调方式, 比如`c.js`依赖`d.js`, 就写成这样:
 
 ```js
 define(['./d'], function(d) {
-  return d.PI;
-});
+  return d.PI
+})
 ```
 
 可以看到, 定义一个模块是使用`define()`函数, `define()`和`require()`的区别是,
@@ -191,7 +191,7 @@ webpack是基于我大Node.js的打包工具, 上来第一件事自然是先安�
 │   ├── index.js              入口js
 │   ├── libs                  不在npm和git上的库扔这里
 │   └── views                 页面放这里
-└── webpack.config.babel.js   webpack配置文件
+└── webpack.config.js         webpack配置文件
 ```
 
 打开命令行窗口, `cd`到刚才建的`simple`目录. 然后执行这个命令初始化项目:
@@ -438,7 +438,7 @@ npm install babel-preset-es2015 --save-dev
 
 ### 配置webpack
 包都装好了, 接下来, 总算可以进入正题了, 是不是有点心累...呵呵.
-我们来创建webpack配置文件`webpack.config.js`, 注意这个文件是在node.js中运行的, 因此不支持es6的`import`语法.
+我们来创建webpack配置文件`webpack.config.js`, 注意这个文件是在node.js中运行的, 因此不支持ES6的`import`语法.
 我们来看文件内容:
 
 ```js
@@ -488,7 +488,7 @@ module.exports = {
         test: /\.html$/,
         /*
         使用html-loader, 将html内容存为js字符串, 比如当遇到
-        import htmlString from './template.html';
+        import htmlString from './template.html'
         template.html的文件内容会被转成一个js字符串, 合并到js文件里.
         */
         use: 'html-loader'
@@ -660,17 +660,24 @@ npm run build
 ## 进阶配置
 上面的项目虽然可以跑起来了, 但有几个点我们还没有考虑到:
 * 指定静态资源的url路径前缀
-* 各个页面分开打包, 这样浏览器只需加载当前访问的页面的代码
+* 各个页面分开打包
 * 打包时区分开发环境和生产环境
 * 输出的entry文件加上hash
-* 第三方库和业务代码分开打包, 这样更新业务代码时可以借助浏览器缓存, 用户不需要重新下载没有发生变化的第三方库
-* 加上favicon
-* 在多人开发时, 每个人可能需要有自己的配置, 比如说webpack-dev-server监听的端口号, 如果写死在webpack配置里,
-  而那个端口号在某个同学的电脑上被其他进程占用了, 简单粗暴的修改`webpack.config.babel.js`会导致提交代码后其他同学的端口也被改掉.
-* 在业务代码中, 我们可能会有需求知道当前的环境, 比如如果是在debug模式, 就`console.log()`一些调试信息出来
+* 第三方库和业务代码分开打包
+* 开发环境关闭performance.hints
+* 配置favicon
+* 打包时自定义部分参数
+* 代码中插入环境变量
+* 开发环境允许其他电脑访问
+* 开发环境和生产环境使用不同的配置
+* 简化import路径
+* 优化babel编译后的代码性能
+* 使用webpack 2自带的ES6模块处理功能
 * 使用autoprefixer自动创建css的vendor prefixes
+* 编译前清空dist目录
 
 那么, 让我们在上面的配置的基础上继续完善, 下面的代码我们只写出改变的部分.
+
 
 ### 指定静态资源的url路径前缀
 现在我们的资源文件的url直接在根目录, 比如`http://127.0.0.1:8100/index.js`, 这样做缓存控制和CDN都不方便, 我们需要给资源文件的url加一个前缀, 比如
@@ -691,7 +698,10 @@ npm run build
 }
 ```
 
+
 ### 各个页面分开打包
+这样浏览器只需加载当前访问的页面的代码.
+
 webpack可以使用异步加载文件的方式引用模块, webpack 1的API是[require.ensure()](https://webpack.js.org/guides/code-splitting-require/),
 webpack 2开始支持TC39的[dynamic import](https://github.com/tc39/proposal-dynamic-import).
 我们这里就使用新的`import()`来实现页面分开打包异步加载. 话不多说, 上代码.
@@ -753,11 +763,12 @@ npm install babel-eslint babel-preset-stage-2 --save-dev
 }
 ```
 
+
 ### 打包时区分开发环境和生产环境
 如果webpack.config.js导出的是一个function, 那么webpack会执行它, 并把返回的结果作为配置对象.
 
 ```js
-module.exports = function(options = {}) {
+module.exports = (options = {}) => {
   return {
     // 配置内容
   }
@@ -784,52 +795,50 @@ webpack --env.dev --env.server localhost
 }
 ```
 
+
 ### 输出的entry文件加上hash
 上面我们提到了chunkFilename可以加上[chunkhash]防止浏览器读取错误缓存, 那么entry同样需要加上hash.
 但使用webpack-dev-server启动开发环境时, entry文件是没有[chunkhash]的, 用了会报错.
-因此我们需要利用上面提到的区分开发环境和生产环境的
+因此我们需要利用上面提到的区分开发环境和生产环境的功能, 只在打包生产环境代码时加上[chunkhash]
 
 ```js
-module.exports = function(options = {}) {
+module.exports = (options = {}) => {
   return {
+    /*
+    这里entry我们改用对象来定义
+    属性名在下面的output.filename中使用, 值为文件路径
+    */
     entry: {
-      index: './src/index', // 属性名用来和下面的output.filename配合使用
+      index: './src/index',
     },
 
     output: {
       /*
       entry字段配置的入口js的打包输出文件名
-      [name]作为占位符, 在输出时会被替换为entry里配置的属性名, 比如这里会被替换为"index"
+      [name]作为占位符, 在输出时会被替换为entry里定义的属性名, 比如这里会被替换为"index"
       [chunkhash]是打包后输出文件的hash值的占位符, 把?[chunkhash]跟在文件名后面可以防止浏览器使用缓存的过期内容,
       这里, webpack会生成以下代码插入到index.html中:
       <script type="text/javascript" src="/assets/index.js?d835352892e6aac768bf"></script>
-      这里/assets/目录前缀是下面的publicPath配置的
+      这里/assets/目录前缀是output.publicPath配置的
 
       options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
       因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在后面跟[chunkhash]
-
-      有人可能注意到官网文档中还有一个[hash]占位符, 这个hash是整个编译过程产生的一个总的hash值,
-      它不是针对单个文件的, 并且项目中任何一个文件的改动, 甚至内容没有改变只修改了文件修改日期属性,
-      都会造成这个hash值的改变. 它是始终存在的. 但我们不希望修改一个文件导致所有输出的文件hash都改变,
-      这样就无法利用浏览器缓存了. 因此这个hash意义不大.
       */
       filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
-
-      /*
-      我们称每一个输出的文件为一个chunk. 使用System.import()加载的文件会被分开打包生成一个chunk,
-      chunkFilename用来配置这个chunk输出的文件名.
-      [id]: 编译时每个chunk会有一个id. 这里也可以用[name], 但[name]一般是空的, 此时它等于[id],
-      除非使用require.ensure()指定第三个参数: http://webpack.github.io/docs/code-splitting.html#named-chunks
-      因为一般没必要指定name, 而且System.import()不支持. 所以就没什么意义了.
-      */
-      chunkFilename: '[id].js?[chunkhash]',
     }
   }
 }
 ```
 
+有人可能注意到官网文档中还有一个[hash]占位符, 这个hash是整个编译过程产生的一个总的hash值,
+而不是单个文件的hash值, 项目中任何一个文件的改动, 都会造成这个hash值的改变.
+[hash]占位符是始终存在的, 但我们不希望修改一个文件导致所有输出的文件hash都改变,
+这样就无法利用浏览器缓存了. 因此这个[hash]意义不大.
+
 
 ### 第三方库和业务代码分开打包
+这样更新业务代码时可以借助浏览器缓存, 用户不需要重新下载没有发生变化的第三方库.
+
 我们的思路是, 入口的html文件引两个js, `vendor.js`和`index.js`. `vendor.js`用来引用第三方库,
 比如这儿我们引入一个第三方库来做路由, 我们先安装它:
 
@@ -840,7 +849,7 @@ npm install spa-history --save
 然后在`vendor.js`中, 我们引用一下它:
 
 ```js
-import 'spa-history';
+import 'spa-history'
 ```
 
 我们`import`它但不需要做什么, 这样webpack打包的时候会把这个第三方库打包进`vendor.js.`
@@ -850,19 +859,13 @@ import 'spa-history';
 ```js
 import SpaHistory from 'spa-history'
 
-// 引入页面文件
-import foo from './views/foo'
-import bar from './views/bar'
-
-const routes = {
-  '/foo': foo,
-  '/bar': bar
-}
-
 new SpaHistory({
   onNavigate(location) {
-    const view = new routes[location.path]()
-    view.mount(document.body)
+    import('./views' + loation.path + '/index.js').then(module => {
+      const View = module.default
+      const view = new View()
+      view.mount(document.body)
+    })
   }
 })
 ```
@@ -929,19 +932,15 @@ export default class {
 // 引入webpack, 等会需要用
 const webpack = require('webpack')
 
-export default function(options = {}) {
+module.exports = (options = {}) => {
   return {
-    // entry改为对象配置, 支持多个入口文件
+    // entry中加入vendor
     entry: {
       vendor: './src/vendor',
       index: './src/index'
     },
 
     plugins: [
-      new HtmlWebpackPlugin({
-        template: 'src/index.html'
-      }),
-
       /*
       使用CommonsChunkPlugin插件来处理重复代码
       因为vendor.js和index.js都引用了spa-history, 如果不处理的话, 两个文件里都会有spa-history包的代码,
@@ -949,16 +948,16 @@ export default function(options = {}) {
       */
       new webpack.optimize.CommonsChunkPlugin({
         /*
-        names配置entry中的文件引用的相同库打包进哪个文件, 可以是新建文件, 也可以是entry中已存在的文件
-        这里我们指定引用的相同库打包进vendor.js
+        names: 将entry文件中引用的相同文件打包进指定的文件, 可以是新建文件, 也可以是entry中已存在的文件
+        这里我们指定打包进vendor.js
 
         但这样还不够, 还记得那个chunkFilename参数吗? 这个参数指定了chunk的打包输出的名字,
-        我们设置为 [id].js?[chunkhash] 的格式. 那么打包后这个文件名字符串是存在哪里的呢?
-        它就存在引用它的文件中. 这就意味着每次修改被引用的文件, 即使文件本身没变, 也会因为引用的文件的改变而导致改变.
+        我们设置为 [id].js?[chunkhash] 的格式. 那么打包时这个文件名存在哪里的呢?
+        它就存在引用它的文件中. 这就意味着被引用的文件发生改变, 会导致引用的它文件也发生改变.
 
-        然后CommonsChunkPlugin有个附加效果, 会把所有的chunk文件名合并到names指定的文件中.
-        那么这时当我们修改foo或者bar的时候, vendor.js也会跟着改变, 而index.js不会变.
-        那么怎么处理这些chunk文件名呢?
+        然后CommonsChunkPlugin有个附加效果, 会把所有chunk的文件名记录到names指定的文件中.
+        那么这时当我们修改页面foo或者bar时, vendor.js也会跟着改变, 而index.js不会变.
+        那么怎么处理这些chunk, 使得修改页面代码而不会导致entry文件改变呢?
 
         这里我们用了一点小技巧. names参数可以是一个数组, 意思相当于调用多次CommonsChunkPlugin,
         比如:
@@ -982,28 +981,138 @@ export default function(options = {}) {
         ]
 
         首先把重复引用的库打包进vendor.js, 这时候我们的代码里已经没有重复引用了, chunk文件名存在vendor.js中,
-        然后我们在执行一次CommonsChunkPlugin, 把chunk文件名打包到manifest.js中.
-        这样我们就实现了chunk文件名和代码的分离. 这样修改一个js文件不会导致其他js文件在打包时发生改变.
+        然后我们在执行一次CommonsChunkPlugin, 把所有chunk的文件名打包到manifest.js中.
+        这样我们就实现了chunk文件名和代码的分离. 这样修改一个js文件不会导致其他js文件在打包时发生改变, 只有manifest.js会改变.
         */
         names: ['vendor', 'manifest']
       })
-    ],
-
-    // ...
+    ]
   }
 }
 ```
 
 
-### 执行命令行时可以自定义部分参数
-当我们通过`npm run`执行脚本的时候, 可以传自定义的参数:
+### 开发环境关闭performance.hints
+我们注意到运行开发环境是命令行会报一段warning:
+
+```
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (250 kB).
+This can impact web performance.
+...
+```
+
+这是说建议每个输出的js文件的大小不要超过250k. 但开发环境因为包含了sourcemap并且代码未压缩所以一般都会超过这个大小,
+所以我们可以在开发环境把这个warning关闭.
+
+webpack配置中加入:
+
+```js
+{
+  performance: {
+    hints: options.dev ? false : 'warning'
+  }
+}
+```
+
+
+### 配置favicon
+在src目录中放一张favicon.png, 然后`src/index.html`的`<head>中插入:
+
+```html
+<link rel="icon" type="image/png" href="favicon.png">
+```
+
+修改webpack配置:
+
+```js
+{
+  module: {
+    rules: [
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: 'html-loader',
+            options: {
+              /*
+              html-loader接受attrs参数, 表示什么标签的什么属性需要调用webpack的loader进行打包.
+              比如<img>标签的src属性, webpack会把<img>引用的图片打包, 然后src的属性值替换为打包后的路径.
+              使用什么loader代码, 同样是在module.rules定义中使用匹配的规则.
+
+              如果html-loader不指定attrs参数, 默认值是img:src, 意味着会默认打包<img>标签的图片.
+              这里我们加上<link>标签的href属性, 用来打包入口index.html引入的favicon.png文件.
+              */
+              attrs: ['img:src', 'link:href']
+            }
+          }
+        ]
+      },
+
+      {
+        /*
+        匹配favicon.png
+        上面的html-loader会把入口index.html引用的favicon.png图标文件解析出来进行打包
+        打包规则就按照这里指定的loader执行
+        */
+        test: /favicon\.png$/,
+
+        use: [
+          {
+            // 使用file-loader
+            loader: 'file-loader',
+            options: {
+              /*
+              name: 指定文件输出名
+              [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
+              这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
+              */
+              name: '[name].[ext]?[hash]'
+            }
+          }
+        ]
+      },
+
+      // 图片文件的加载配置增加一个exclude参数
+      {
+        test: /\.(png|jpg|jpeg|gif|eot|ttf|woff|woff2|svg|svgz)(\?.+)?$/,
+
+        // 排除favicon.png, 因为它已经由上面的loader处理了. 如果不排除掉, 它会被这个loader再处理一遍
+        exclude: /favicon\.png$/,
+
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10000
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+其实html-webpack-plugin接受一个`favicon`参数, 可以指定favicon文件路径, 会自动打包插入到html文件中.
+但它有个[bug](https://github.com/ampedandwired/html-webpack-plugin/issues/364), 打包后的文件名路径不带hash,
+就算有hash, 它也是[hash], 而不是[chunkhash], 导致修改代码也会改变favicon打包输出的文件名.
+issue中提到的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
+
+
+### 打包时自定义部分参数
+在多人开发时, 每个人可能需要有自己的配置, 比如说webpack-dev-server监听的端口号, 如果写死在webpack配置里,
+而那个端口号在某个同学的电脑上被其他进程占用了, 简单粗暴的修改`webpack.config.js`会导致提交代码后其他同学的端口也被改掉.
+
+我们可以在`npm run`传自定义参数来解决这个问题:
+
 ```sh
 npm run dev --config=myconfig
 ```
 
 我们在项目根目录建立一个文件夹`config`, 里面创建`default.js`:
+
 ```js
-export default {
+module.exports = {
   server: {
     port: 8100,
     proxy: {
@@ -1020,42 +1129,39 @@ export default {
       }
     }
   }
-};
+}
 ```
 
 `default.js`作为不传config参数时的默认配置, 然后我们创建`myconfig.js`:
+
 ```js
-import config from './default';
-config.devServer.port = 8200;
-export default config;
+const config = require('./default')
+config.devServer.port = 8200
+module.exports = config
 ```
+
 `myconfig.js`引用默认配置, 修改`port`为`8200`.
 
-然后在`webpack.config.babel.js`中, 我们相应的修改一下导出的函数:
+webpack配置修改:
+
 ```js
-export default function(options = {}) {
-  // require()和import()一样, export default ... 的东西被赋值到了default属性中
-  const config = require('./config/' + (process.env.npm_config_config || 'default')).default;
+module.exports = (options = {}) => {
+  const config = require('./config/' + (process.env.npm_config_config || 'default'))
 
   return {
-    // ...省略未改动部分
-
+    // ...
     devServer: {
       port: config.devServer.port,
+      proxy: config.devServer.proxy,
       historyApiFallback: {
         index: '/assets/'
-      },
-
-      proxy: config.devServer.proxy
+      }
     }
   }
 }
 ```
+
 这里的关键是`npm run`传进来的自定义参数可以通过`process.env.npm_config_*`获得. 参数中如果有`-`会被转成`_`
-
-这样, 我们就实现了不同的人或者环境, 自定义部分参数.
-
-这里我们需要用require()来动态加载js文件, 因为import不支持动态加载, import()是异步加载, 不方便.
 
 `config.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
 `/api/pay/*`的请求会被转发到 `http://api.example.dev/pay/*`.
@@ -1065,26 +1171,30 @@ export default function(options = {}) {
 `pathRewrite`用来改写URL, 这里我们把`/api`前缀去掉.
 
 还有一点, 我们一般不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
+
 ```
 conf/*
 !conf/default.js
 ```
+
 把`conf`目录排除掉, 但是保留默认配置文件.
 
 
-### 往代码中插入一些环境变量
-这里我们用到了[DefinePlugin](http://webpack.github.io/docs/list-of-plugins.html#defineplugin)插件.
+### 代码中插入环境变量
+在业务代码中, 有些变量在开发环境和生产环境是不同的, 比如域名, 后台API地址等. 还有开发环境可能需要打印调试信息等.
+
+我们可以使用[DefinePlugin](http://webpack.github.io/docs/list-of-plugins.html#defineplugin)插件在打包时往代码中插入需要的环境变量,
+
 ```js
-export default function(options = {}) {
-  const config = require('./conf/' + (process.env.npm_config_config || 'default')).default;
-  const pkgInfo = require('./package.json');
+// ...
+const pkgInfo = require('./package.json')
+
+module.exports = (options = {}) => {
+  const config = require('./conf/' + (process.env.npm_config_config || 'default')).default
 
   return {
-    // ...省略未改动部分
-
+    // ...
     plugins: [
-      // ...
-
       new webpack.DefinePlugin({
         DEBUG: Boolean(options.dev),
         VERSION: JSON.stringify(pkgInfo.version),
@@ -1096,62 +1206,136 @@ export default function(options = {}) {
 ```
 
 DefinePlugin插件的原理很简单, 如果我们在代码中写:
+
 ```js
 console.log(DEBUG)
 ```
+
 它会做类似这样的处理:
+
 ```js
 'console.log(DEBUG)'.replace('DEBUG', true)
 ```
+
 最后生成:
+
 ```js
 console.log(true)
 ```
 
 这里有一点需要注意, 像这里的`VERSION`, 如果我们不对`pkgInfo.version`做`JSON.stringify()`,
+
 ```js
 console.log(VERSION)
 ```
+
 然后做替换操作:
+
 ```js
 'console.log(VERSION)'.replace('VERSION', '1.0.0')
 ```
+
 最后生成:
+
 ```js
 console.log(1.0.0)
 ```
+
 这样语法就错误了. 所以, 我们需要`JSON.stringify(pkgInfo.version)`转一下变成`'"1.0.0"'`, 替换的时候才会带引号.
 
 还有一点, webpack打包压缩的时候, 会把代码进行优化, 比如:
+
 ```js
 if (DEBUG) {
-  console.log('debug mode');
+  console.log('debug mode')
 } else {
-  console.log('production mode');
+  console.log('production mode')
 }
 ```
+
 会被编译成:
+
 ```js
 if (false) {
-  console.log('debug mode');
+  console.log('debug mode')
 } else {
-  console.log('production mode');
+  console.log('production mode')
 }
 ```
+
 然后压缩优化为:
+
 ```js
-console.log('production mode');
+console.log('production mode')
 ```
 
-## 还有一些细节的优化
-经过上面几轮的调教, 我们的配置文件基本完善了, 但还有一些细节的地方可以优化一下.
 
-### 引用文件的路径过于复杂
+### 开发环境允许其他电脑访问
+webpack配置`devServer.host`为`'0.0.0.0'`即可.
+
+
+### 开发环境和生产环境使用不同的配置
+首先创建config/production.js:
+
+```js
+module.exports = {
+  runtimeConfig: {
+    experimentalFeatures: {
+      featureFoo: false,
+      featureBar: true
+    },
+
+    thirdPartyApiKey: 'gfdsa654321'
+  }
+}
+```
+
+然后在package.json的`build`脚本中加上`--env.config production`参数:
+
+```json
+{
+  "scripts": {
+    "build": "webpack -p --env.config production"
+  }
+}
+```
+
+webpack配置稍作修改:
+
+```js
+module.exports = (options = {}) => {
+  // 优先使用npm run指定的--config, 其次使用写在scripts中的--env.dev, 都没有就使用默认配置文件
+  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
+
+  return {
+    // ...
+    devServer: config.devServer ? {
+      host: '0.0.0.0',
+      port: config.devServer.port,
+      proxy: config.devServer.proxy,
+      historyApiFallback: {
+        index: '/assets/'
+      }
+    } : undefined
+  }
+```
+
+.gitignore中加入
+
+```
+!conf/production.js
+```
+
+
+### 简化import路径
 文件a引入文件b时, b的路径是相对于a文件所在目录的. 如果a和b在不同的目录, 藏得又深, 写起来就会很麻烦:
+
 ```js
-import b from '../../../components/b';
+import b from '../../../components/b'
 ```
+
 为了方便, 我们可以定义一个路径别名(alias):
+
 ```js
 resolve: {
   alias: {
@@ -1159,12 +1343,15 @@ resolve: {
   }
 }
 ```
+
 这样, 我们可以从`~`为基础路径来`import`文件:
+
 ```js
-import b from '~/components/b';
+import b from '~/components/b'
 ```
 
 html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`root`参数, 可以使`/`开头的文件相对于`root`目录解析.
+
 ```js
 {
   test: /\.html$/,
@@ -1179,6 +1366,7 @@ html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`r
   ]
 }
 ```
+
 那么, `<img src="/favicon.png">`就能顺利指向到src目录下的favicon.png文件, 不需要关心当前文件和目标文件的相对路径.
 
 PS: 在调试<img>标签的时候遇到一个坑, `htlm-loader`会解析`<!-- -->`注释中的内容, 之前在注释中写的
@@ -1191,9 +1379,12 @@ PS: 在调试<img>标签的时候遇到一个坑, `htlm-loader`会解析`<!-- --
 之前因为没有加`root`参数, 所以`/`开头的文件名不会被解析, 加了`root`导致编译时报错, 找不到该文件. 大家记住这一点.
 
 
-## 优化babel编译后的代码的性能
-babel编译后的代码一般会造成性能损失, babel提供了一个[loose](http://www.2ality.com/2015/12/babel6-loose-mode.html)选项,
+### 优化babel编译后的代码性能
+babel编译后的代码一般会造成性能损失, babel提供了一个[loose](https://babeljs.io/docs/plugins/preset-es2015/#options)选项,
 使编译后的代码不需要完全遵循ES6规定, 简化编译后的代码, 提高代码执行效率:
+
+package.json:
+
 ```json
 {
   "babel": {
@@ -1205,71 +1396,55 @@ babel编译后的代码一般会造成性能损失, babel提供了一个[loose](
             "loose": true
           }
         }
-      ]
+      ],
+      "stage-2"
     ]
   }
 }
 ```
+
 但这么做会有兼容性的风险, 可能会导致ES6源码理应的执行结果和编译后的ES5代码的实际结果并不一致.
-如果代码没有遇到实际的效率瓶颈, 官方不建议使用`loose`模式.
+如果代码没有遇到实际的效率瓶颈, 官方[不建议](http://www.2ality.com/2015/12/babel6-loose-mode.html)使用`loose`模式.
 
 
-## 其他问题
+### 使用webpack 2自带的ES6模块处理功能
+我们目前的配置, babel会把ES6模块定义转为CommonJS定义, 但webpack自己可以处理`import`和`export`,
+而且webpack处理`import`时会做代码优化, 把没用到的部分代码删除掉.
+因此我们通过babel提供的`modules: false`选项把ES6模块转为CommonJS模块的功能给关闭掉.
 
-### 为什么不使用webpack.config.babel.js
-部分同学可能知道webpack可以读取webpack.config.babel.js, 它会先调用babel将文件编译后再执行. 但这里有两个坑:
+package.json:
 
-1, 由于我们的package.json中的babel配置指定了`modules: false`, 所以babel并不会转码`import`, 这导致编译后的webpack配置文件仍然无法在node.js中执行, 解决方案是package.json不指定`modules: false`, 而在babel-loader中的options中配置babel:
-```js
+```json
 {
-  test: /\.js$/,
-  exclude: /node_modules/,
-  use: [
-    {
-      loader: 'babel-loader',
-      options: {
-        presets: [
-          ['latest', {
-            es2015: {
-              loose: true,
-              modules: false
-            }
-          }],
-          'stage-2'
-        ]
-      }
-    },
-
-    'eslint-loader'
-  ]
+  "babel": {
+    "presets": [
+      [
+        "latest",
+        {
+          "es2015": {
+            "loose": true,
+            "modules": false
+          }
+        }
+      ],
+      "stage-2"
+    ]
+  }
 }
 ```
-这样webpack.config.babel.js会使用package.json的babel配置编译, 而webpack编译的js会使用babel-loader指定的配置编译.
 
-2, postcss的配置不支持先用babel转码, 这导致了我们的配置文件格式的不统一.
-
-综上, 还是只在src目录中的文件使用es6模块规范会比较方便一点.
-
-## 使用webpack 2自带的ES6模块处理功能
-我们目前的配置, `import`和`export`都是由babel转成CommonJS模块的, 但其实webpack自己可以处理`import`和`export`,
-而且webpack处理`import`时会做代码优化, 把没用到的部分代码删除掉. 因此我们可以把babel转ES6模块到commonjs模块的功能给关闭掉.
-但这里有一个问题, webpack的配置文件`webpack.config.babel.js`自身是不经过webpack编译的,
-它只是经过babel编译后在node.js中执行, 而node.js的模块是CommonJS规范的, 因此这个文件和它引入的文件都不认识`import`和`export`.
-
-那么我们怎么babel处理webpack配置文件的`import`和`export`, 但不处理`src`目录中的呢?
-
-一个办法是, 我们可以不修改`package.json`中的配置, 而在`babel-loader`的`options`参数再写一份babel的配置,
-这样, 只有webpack处理的文件会按这份配置的规则处理. 我们在这份配置中加入 `modules: false` 参数:
-
-## 使用autoprefixer自动创建css的vendor prefixes
+### 使用autoprefixer自动创建css的vendor prefixes
 css有一个很麻烦的问题就是比较新的css属性在各个浏览器里是要加前缀的, 我们可以使用[autoprefixer](https://github.com/postcss/autoprefixer)工具自动创建这些浏览器规则,
 那么我们的css中只需要写:
+
 ```css
 :fullscreen a {
     display: flex
 }
 ```
+
 autoprefixer会编译成:
+
 ```css
 :-webkit-full-screen a {
     display: -webkit-box;
@@ -1290,70 +1465,49 @@ autoprefixer会编译成:
 ```
 
 首先, 我们用npm安装它:
+
 ```sh
 npm install postcss-loader autoprefixer --save-dev
 ```
+
 autoprefixer是[postcss](http://postcss.org/)的一个插件, 所以我们也要安装postcss的webpack [loader](https://github.com/postcss/postcss-loader).
 
-`webpack.config.babel.js`修改一下:
+修改一下webpack的css rule:
+
 ```js
-// ...
-
-export default function(options = {}) {
-  // ...
-  return {
-    // ...
-    module: {
-      rules: [
-        // ...
-
-        {
-          test: /\.css$/,
-          use: ['style-loader', 'css-loader', 'postcss-loader']
-        },
-
-        // ...
-      ]
-    }
-
-    // ...
-
-  };
+{
+  test: /\.css$/,
+  use: ['style-loader', 'css-loader', 'postcss-loader']
 }
 ```
+
 然后创建文件`postcss.config.js`:
+
 ```js
 module.exports = {
   plugins: [
     require('autoprefixer')()
   ]
-};
-```
-你会发现, 这里我们使用了CommonJS规范的模块定义, 因为postcss配置文件不支持使用babel转码...
-因为这个原因, 我们的配置文件中中出了一个CommonJS格式的, 有点不统一. 而且联想到上面的babel配置要在`package.json`和webpack配置中各写一份, 也是很蛋疼. 因此, 我干脆连webpack配置也不用babel转码了, 把`webpack.config.babel.js`改名为`webpack.config.js`,
-然后把`import ...`用`require()`代替, `export ...`用`module.exports = ...`代替. 把`babel-loader`的`options`删除.
-`package.json`中`babel`的配置增加`"modules": false`. `conf`目录下的配置文件也相应改一下. 因为node.js除了ES6模块定义不支持, 其他ES6语法都支持, 因此其他都不用更改.
-
-
-## 编译前清空dist目录
-不清空的话上次编译生成的文件会遗留在dist目录中, 我们最好先把目录清空一下.
-macOS/Linux下可以用`rm -rf dist`搞定, 考虑到跨平台的需求, 我们可以用`rimraf`:
-```sh
-npm install rimraf --save-dev
-```
-`package.json`修改一下:
-```json
-{
-  "scripts": {
-    "dev": "webpack-dev-server -d --hot --env.dev",
-    "build": "rimraf dist && webpack -p"
-  },
 }
 ```
 
+### 编译前清空dist目录
+不清空的话上次编译生成的文件会遗留在dist目录中, 我们最好先把目录清空一下.
+macOS/Linux下可以用`rm -rf dist`搞定, 考虑到跨平台的需求, 我们可以用`rimraf`:
 
-## 开发环境允许其他电脑访问
-`webpack.config.js`中`devServer.host`设置为`'0.0.0.0'`即可.
+```sh
+npm install rimraf --save-dev
+```
+
+`package.json`修改一下:
+
+```json
+{
+  "scripts": {
+    "build": "rimraf dist && webpack -p --env.config production"
+  },
+}
+```
 
 
 ## 非SPA的展示型网页能否用webpack打包?
@@ -1361,6 +1515,7 @@ npm install rimraf --save-dev
 那么我们仍然可以使用webpack来打包展示型网页.
 
 非SPA的页面意味着并没有一个单一的html入口和js入口, 而是每个页面对应一个html和多个js. 那么我们可以把项目结构设计为:
+
 ```
 ├── dist
 ├── package.json
@@ -1386,32 +1541,35 @@ npm install rimraf --save-dev
 |               └── style.css
 └── webpack.config.js
 ```
+
 这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理.
 `index.js`是每个页面的业务逻辑, 全部作为入口js配置到`entry`中. 页面公用的第三方库仍然打包进`vendor.js`.
 这里我们需要用`glob`库来把这些文件都筛选出来批量操作.
+
 ```sh
 npm install glob --save-dev
 ```
 
 `webpack.config.js`修改的地方:
+
 ```js
 // ...
-const glob = require('glob');
+const glob = require('glob')
 
-module.exports = function(options = {}) {
+module.exports = (options = {}) => {
   // ...
 
-  const entries = glob.sync('./src/**/index.js');
-  const entryJsList = {};
-  const entryHtmlList = [];
+  const entries = glob.sync('./src/**/index.js')
+  const entryJsList = {}
+  const entryHtmlList = []
   for (const path of entries) {
-    const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length);
-    entryJsList[chunkName] = path;
+    const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
+    entryJsList[chunkName] = path
     entryHtmlList.push(new HtmlWebpackPlugin({
       template: path.replace('index.js', 'index.html'),
       filename: chunkName + '.html',
       chunks: ['manifest', 'vendor', chunkName]
-    }));
+    }))
   }
 
   return {
@@ -1425,9 +1583,49 @@ module.exports = function(options = {}) {
       ...entryHtmlList,
       // ...
     ]
-  };
-};
+  }
+}
 ```
+
+
+## 其他问题
+
+### 为什么不使用webpack.config.babel.js
+部分同学可能知道webpack可以读取webpack.config.babel.js, 它会先调用babel将文件编译后再执行. 但这里有两个坑:
+
+1, 由于我们的package.json中的babel配置指定了`modules: false`, 所以babel并不会转码`import`, 这导致编译后的webpack配置文件仍然无法在node.js中执行, 解决方案是package.json不指定`modules: false`, 而在babel-loader中的options中配置babel:
+
+```js
+{
+  test: /\.js$/,
+  exclude: /node_modules/,
+  use: [
+    {
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          ['latest', {
+            es2015: {
+              loose: true,
+              modules: false
+            }
+          }],
+          'stage-2'
+        ]
+      }
+    },
+
+    'eslint-loader'
+  ]
+}
+```
+
+这样webpack.config.babel.js会使用package.json的babel配置编译, 而webpack编译的js会使用babel-loader指定的配置编译.
+
+2, postcss的配置不支持先用babel转码, 这导致了我们的配置文件格式的不统一.
+
+综上, 还是只在src目录中的文件使用ES6模块规范会比较方便一点.
+
 
 ## 总结
 通过这篇文章, 我想大家应该学会了webpack的正确打开姿势. 虽然我没有提及如何用webpack来编译[React](https://facebook.github.io/react/)和[vue.js](http://vuejs.org/), 但大家可以想到,
@@ -1435,7 +1633,10 @@ module.exports = function(options = {}) {
 具体的大家自己去摸索一下. 以后有时间我会把脚手架整理一下放到github上, 供大家参考.
 
 
+## 几个脚手架
+* [vue boilerplate](https://github.com/fenivana/vue-boilerplate)
+* [Vue SSR Boilerplate](https://github.com/fenivana/vue-ssr-boilerplate)
+
+
 ## 版权许可
-本文章采用“保持署名—非商用”创意共享4.0许可证。
-只要保持原作者署名和非商用，您可以自由地阅读、分享、修改本文章。
-详细的法律条文请参见[创意共享](http://creativecommons.org/licenses/by-nc/4.0/)网站。
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。

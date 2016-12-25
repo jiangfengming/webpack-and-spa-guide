@@ -1,23 +1,23 @@
-const { resolve } = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const pkgInfo = require('./package.json');
-const glob = require('glob');
+const { resolve } = require('path')
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const pkgInfo = require('./package.json')
+const glob = require('glob')
 
-module.exports = function(options = {}) {
-  const config = require('./config/' + (process.env.npm_config_config || 'default'));
+module.exports = (options = {}) => {
+  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
 
-  const entries = glob.sync('./src/**/index.js');
-  const entryJsList = {};
-  const entryHtmlList = [];
-  for (const filepath of entries) {
-    const chunkName = filepath.slice('./src/pages/'.length, -'/index.js'.length);
-    entryJsList[chunkName] = filepath;
+  const entries = glob.sync('./src/**/index.js')
+  const entryJsList = {}
+  const entryHtmlList = []
+  for (const path of entries) {
+    const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
+    entryJsList[chunkName] = path
     entryHtmlList.push(new HtmlWebpackPlugin({
-      template: filepath.replace('index.js', 'index.html'),
+      template: path.replace('index.js', 'index.html'),
       filename: chunkName + '.html',
       chunks: ['manifest', 'vendor', chunkName]
-    }));
+    }))
   }
 
   return {
@@ -28,8 +28,7 @@ module.exports = function(options = {}) {
     output: {
       path: resolve(__dirname, 'dist'),
       filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
-      chunkFilename: '[id].js?[chunkhash]',
-      publicPath: '/'
+      chunkFilename: '[id].js?[chunkhash]'
     },
 
     module: {
@@ -99,16 +98,20 @@ module.exports = function(options = {}) {
       })
     ],
 
-    devServer: {
-      host: '0.0.0.0',
-      port: config.devServer.port,
-      proxy: config.devServer.proxy
-    },
-
     resolve: {
       alias: {
         '~': resolve(__dirname, 'src')
       }
+    },
+
+    devServer: config.devServer ? {
+      host: '0.0.0.0',
+      port: config.devServer.port,
+      proxy: config.devServer.proxy
+    } : undefined,
+
+    performance: {
+      hints: options.dev ? false : 'warning'
     }
-  };
-};
+  }
+}

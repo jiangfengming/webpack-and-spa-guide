@@ -5,29 +5,31 @@
   "main": "",
   "scripts": {
     "dev": "webpack-dev-server -d --hot --env.dev",
-    "build": "rimraf dist && webpack -p"
+    "build": "rimraf dist && webpack -p --env.config production"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "autoprefixer": "^6.5.3",
-    "babel-core": "^6.18.2",
-    "babel-loader": "^6.2.7",
+    "autoprefixer": "^6.6.0",
+    "babel-core": "^6.21.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.2.10",
     "babel-preset-latest": "^6.16.0",
-    "css-loader": "^0.26.0",
-    "eslint": "^3.11.1",
-    "eslint-config-enough": "^0.1.2",
+    "babel-preset-stage-2": "^6.18.0",
+    "css-loader": "^0.26.1",
+    "eslint": "^3.12.2",
+    "eslint-config-enough": "^0.2.0",
     "eslint-loader": "^1.6.1",
     "file-loader": "^0.9.0",
     "glob": "^7.1.1",
     "html-loader": "^0.4.4",
     "html-webpack-plugin": "^2.24.1",
-    "postcss-loader": "^1.1.1",
+    "postcss-loader": "^1.2.1",
     "rimraf": "^2.5.4",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^2.1.0-beta.26",
-    "webpack-dev-server": "^2.1.0-beta.10"
+    "webpack": "^2.2.0-rc.2",
+    "webpack-dev-server": "^2.2.0-rc.0"
   },
   "babel": {
     "presets": [
@@ -39,10 +41,12 @@
             "modules": false
           }
         }
-      ]
+      ],
+      "stage-2"
     ]
   },
   "eslintConfig": {
+    "parser": "babel-eslint",
     "extends": "enough",
     "env": {
       "browser": true,

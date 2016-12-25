@@ -4,3 +4,4 @@ npm-debug.log*
 .idea
 conf/*
 !conf/default.js
+!conf/production.js

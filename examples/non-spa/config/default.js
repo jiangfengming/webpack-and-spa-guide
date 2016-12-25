@@ -9,7 +9,7 @@ module.exports = {
   },
 
   devServer: {
-    port: 8010,
+    port: 8100,
     proxy: {
       '/api/auth/': {
         target: 'http://api.example.dev',
@@ -24,4 +24,4 @@ module.exports = {
       }
     }
   }
-};
+}
