@@ -1247,7 +1247,7 @@ conf/*
 const pkgInfo = require('./package.json')
 
 module.exports = (options = {}) => {
-  const config = require('./conf/' + (process.env.npm_config_config || 'default')).default
+  const config = require('./conf/' + (process.env.npm_config_config || options.config || 'default')).default
 
   return {
     // ...
