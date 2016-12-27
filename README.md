@@ -1212,6 +1212,8 @@ npm run dev --config=CONFIG_NAME
 
 `local`命令就是这样做的.
 
+这样, 当我们执行`npm run dev`时使用的是`dev.js`, 执行`npm run local`使用`local.js`, 执行`npm run build`使用`default.js`.
+
 
 `config.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
 `/api/pay/*`的请求会被转发到 `http://api.example.dev/pay/*`.
