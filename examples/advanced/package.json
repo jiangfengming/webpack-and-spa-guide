@@ -4,8 +4,9 @@
   "description": "",
   "main": "",
   "scripts": {
-    "dev": "webpack-dev-server -d --hot --env.dev",
-    "build": "rimraf dist && webpack -p --env.config production"
+    "local": "npm run dev --config=local",
+    "dev": "webpack-dev-server -d --hot --env.dev --env.config dev",
+    "build": "rimraf dist && webpack -p"
   },
   "author": "",
   "license": "ISC",

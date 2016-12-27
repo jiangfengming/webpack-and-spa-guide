@@ -2,6 +2,7 @@ const { resolve } = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const pkgInfo = require('./package.json')
+const url = require('url')
 
 module.exports = (options = {}) => {
   const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
@@ -16,7 +17,7 @@ module.exports = (options = {}) => {
       path: resolve(__dirname, 'dist'),
       filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
       chunkFilename: '[id].js?[chunkhash]',
-      publicPath: '/assets/'
+      publicPath: config.publicPath
     },
 
     module: {
@@ -99,7 +100,7 @@ module.exports = (options = {}) => {
       port: config.devServer.port,
       proxy: config.devServer.proxy,
       historyApiFallback: {
-        index: '/assets/'
+        index: url.parse(config.publicPath).pathname
       }
     } : undefined,
 

@@ -606,6 +606,16 @@ module.exports = {
 ./node_modules/.bin/webpack-dev-server -d --hot
 ```
 
+上面的命令适用于Mac/Linux等*nix系统, 也适用于Windows上的PowerShell和bash/zsh环境([Bash on Wbuntu on Windows](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), [Git Bash](https://git-scm.com/downloads), [Babun](http://babun.github.io/), [MSYS2](http://msys2.github.io/)等).
+
+如果使用Windows的cmd.exe, 请执行:
+
+```
+node_modules\.bin\webpack-dev-server -d --hot
+```
+
+我在这里安利Windows同学使用`Bash on Ubuntu on Windows`, 可以避免很多跨平台的问题, 比如设置环境变量.
+
 npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以我们要在这个目录下执行命令.
 
 `-d`参数是开发环境(Development)的意思, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug,
@@ -673,10 +683,9 @@ npm run build
 * 第三方库和业务代码分开打包
 * 开发环境关闭performance.hints
 * 配置favicon
+* 开发环境允许其他电脑访问
 * 打包时自定义部分参数
 * 代码中插入环境变量
-* 开发环境允许其他电脑访问
-* 开发环境和生产环境使用不同的配置
 * 简化import路径
 * 优化babel编译后的代码性能
 * 使用webpack 2自带的ES6模块处理功能
@@ -1106,21 +1115,32 @@ webpack配置中加入:
 issue中提到的favicons-webpack-plugin倒是可以用, 但它依赖PhantomJS, 非常大.
 
 
+### 开发环境允许其他电脑访问
+webpack配置`devServer.host`为`'0.0.0.0'`即可.
+
+
 ### 打包时自定义部分参数
 在多人开发时, 每个人可能需要有自己的配置, 比如说webpack-dev-server监听的端口号, 如果写死在webpack配置里,
 而那个端口号在某个同学的电脑上被其他进程占用了, 简单粗暴的修改`webpack.config.js`会导致提交代码后其他同学的端口也被改掉.
 
-我们可以在`npm run`传自定义参数来解决这个问题:
+还有一点就是开发环境/测试环境/生产环境的部分webpack配置是不同的, 比如`publicPath`在生产环境可能要配置一个CDN地址.
 
-```sh
-npm run dev --config=myconfig
-```
-
-我们在项目根目录建立一个文件夹`config`, 里面创建`default.js`:
+我们在根目录建立一个文件夹`config`, 里面创建3个配置文件:
+* `default.js`: 生产环境
 
 ```js
 module.exports = {
-  server: {
+  publicPath: 'http://cdn.example.com/assets/'
+}
+```
+
+* `dev.js`: 默认开发环境
+
+```js
+module.exports = {
+  publicPath: '/assets/',
+
+  devServer: {
     port: 8100,
     proxy: {
       '/api/auth/': {
@@ -1139,36 +1159,65 @@ module.exports = {
 }
 ```
 
-`default.js`作为不传config参数时的默认配置, 然后我们创建`myconfig.js`:
+* `local.js`: 个人本地环境, 在dev.js基础上修改部分参数.
 
 ```js
-const config = require('./default')
+const config = require('./dev')
 config.devServer.port = 8200
 module.exports = config
 ```
 
-`myconfig.js`引用默认配置, 修改`port`为`8200`.
+我们可以在`npm run`传自定义参数来解决这个问题:
+
+```sh
+npm run dev --config=myconfig
+```
+
+package.json修改scripts:
+
+```json
+{
+  "scripts": {
+    "local": "npm run dev --config=local",
+    "dev": "webpack-dev-server -d --hot --env.dev --env.config dev",
+    "build": "rimraf dist && webpack -p"
+  }
+}
+```
 
 webpack配置修改:
 
 ```js
+// ...
+const url = require('url')
+
 module.exports = (options = {}) => {
-  const config = require('./config/' + (process.env.npm_config_config || 'default'))
+  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
 
   return {
     // ...
-    devServer: {
+    devServer: config.devServer ? {
+      host: '0.0.0.0',
       port: config.devServer.port,
       proxy: config.devServer.proxy,
       historyApiFallback: {
-        index: '/assets/'
+        index: url.parse(config.publicPath).pathname
       }
-    }
+    } : undefined,
   }
 }
 ```
 
 这里的关键是`npm run`传进来的自定义参数可以通过`process.env.npm_config_*`获得. 参数中如果有`-`会被转成`_`
+
+`--env.*`传进来的参数可以通过`options.*`获得. 我们优先使用`npm run`指定的配置文件. 这样我们可以在命令行覆盖scripts中指定的配置文件:
+
+```sh
+npm run dev --config=CONFIG_NAME
+```
+
+`local`命令就是这样做的.
+
 
 `config.devServer.proxy`用来配置后端api的反向代理, ajax `/api/auth/*`的请求会被转发到 `http://api.example.dev/auth/*`,
 `/api/pay/*`的请求会被转发到 `http://api.example.dev/pay/*`.
@@ -1177,14 +1226,15 @@ module.exports = (options = {}) => {
 
 `pathRewrite`用来改写URL, 这里我们把`/api`前缀去掉.
 
-还有一点, 我们一般不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
+还有一点, 我们不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
 
 ```
 conf/*
 !conf/default.js
+!conf/dev.js
 ```
 
-把`conf`目录排除掉, 但是保留默认配置文件.
+把`conf`目录排除掉, 但是保留生产环境和dev默认配置文件.
 
 
 ### 代码中插入环境变量
@@ -1274,63 +1324,6 @@ if (false) {
 
 ```js
 console.log('production mode')
-```
-
-
-### 开发环境允许其他电脑访问
-webpack配置`devServer.host`为`'0.0.0.0'`即可.
-
-
-### 开发环境和生产环境使用不同的配置
-首先创建config/production.js:
-
-```js
-module.exports = {
-  runtimeConfig: {
-    experimentalFeatures: {
-      featureFoo: false,
-      featureBar: true
-    },
-
-    thirdPartyApiKey: 'gfdsa654321'
-  }
-}
-```
-
-然后在package.json的`build`脚本中加上`--env.config production`参数:
-
-```json
-{
-  "scripts": {
-    "build": "webpack -p --env.config production"
-  }
-}
-```
-
-webpack配置稍作修改:
-
-```js
-module.exports = (options = {}) => {
-  // 优先使用npm run指定的--config, 其次使用写在scripts中的--env.dev, 都没有就使用默认配置文件
-  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
-
-  return {
-    // ...
-    devServer: config.devServer ? {
-      host: '0.0.0.0',
-      port: config.devServer.port,
-      proxy: config.devServer.proxy,
-      historyApiFallback: {
-        index: '/assets/'
-      }
-    } : undefined
-  }
-```
-
-.gitignore中加入
-
-```
-!conf/production.js
 ```
 
 
