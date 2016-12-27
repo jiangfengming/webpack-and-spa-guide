@@ -1167,13 +1167,7 @@ config.devServer.port = 8200
 module.exports = config
 ```
 
-我们可以在`npm run`传自定义参数来解决这个问题:
-
-```sh
-npm run dev --config=myconfig
-```
-
-package.json修改scripts:
+`package.json`修改`scripts`:
 
 ```json
 {
