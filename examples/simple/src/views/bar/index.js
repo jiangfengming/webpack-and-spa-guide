@@ -1,5 +1,5 @@
 // 引入全局对象
-import global from '../../global'
+import g from '../../global'
 
 // 引入html模板, 会被作为字符串引入
 import template from './index.html'
@@ -14,7 +14,7 @@ export default class {
     container.innerHTML = template
     container.querySelector('.bar__gofoo').addEventListener('click', () => {
       // 调用router.go方法加载 /foo 页面
-      global.router.go('/foo')
+      g.router.go('/foo')
     })
   }
 }

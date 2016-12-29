@@ -212,7 +212,7 @@ npm install
 
 ```js
 // 引入作为全局对象储存空间的global.js, js文件可以省略后缀
-import global from './global'
+import g from './global'
 
 // 引入页面文件
 import foo from './views/foo'
@@ -253,17 +253,17 @@ class Router {
   }
 }
 
-// new一个路由对象, 赋值为global.router, 这样我们在其他js文件中可以引用到
-global.router = new Router()
+// new一个路由对象, 赋值为g.router, 这样我们在其他js文件中可以引用到
+g.router = new Router()
 // 启动
-global.router.start()
+g.router.start()
 ```
 
 现在我们还没有讲webpack配置所以页面还无法访问, 我们先从理论上讲解一下, 等会弄好webpack配置后再实际看页面效果. 当我们访问 `http://localhost:8100/foo` 的时候, 路由会加载 `./views/foo/index.js`文件, 我们来看看这个文件:
 
 ```js
 // 引入全局对象
-import global from '../../global'
+import g from '../../global'
 
 // 引入html模板, 会被作为字符串引入
 import template from './index.html'
@@ -278,7 +278,7 @@ export default class {
     container.innerHTML = template
     container.querySelector('.foo__gobar').addEventListener('click', () => {
       // 调用router.go方法加载 /bar 页面
-      global.router.go('/bar')
+      g.router.go('/bar')
     })
   }
 }

@@ -1,5 +1,5 @@
 // 引入作为全局对象储存空间的global.js, js文件可以省略后缀
-import global from './global'
+import g from './global'
 
 // 引入页面文件
 import foo from './views/foo'
@@ -40,7 +40,7 @@ class Router {
   }
 }
 
-// new一个路由对象, 赋值为global.router, 这样我们在其他js文件中可以引用到
-global.router = new Router()
+// new一个路由对象, 赋值为g.router, 这样我们在其他js文件中可以引用到
+g.router = new Router()
 // 启动
-global.router.start()
+g.router.start()
