@@ -295,10 +295,10 @@ export default class {
 我们把webpack和它的插件安装到项目:
 
 ```sh
-npm install webpack@2.2.0-rc.2 webpack-dev-server@2.2.0-rc.0 html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
+npm install webpack@2.2.0 webpack-dev-server@2.2.0 html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
 
-这里, 我们用`@2.2.0-rc.2`指定了webpack版本号, 因为2还在RC阶段, 不指定的话默认会装1. 因为2基本没问题了, 所以就没必要教大家用1了. 那么怎么知道最新的测试版本是哪个呢? 执行下面命令查看:
+这里, 我们用`@2.2.0`指定了webpack版本号, 因为npm上的默认版本是1.14.0, 不指定的话默认会装1. 执行下面命令可以查看npm上的包的最新非默认版本:
 
 ```sh
 npm show webpack versions --json
@@ -311,14 +311,6 @@ npm show webpack versions --json
 [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.
 
 [file-loader](https://github.com/webpack/file-loader)和[url-loader](https://github.com/webpack/url-loader)是打包二进制文件的插件, 具体也在配置文件章节讲解.
-
-如果安装过程中提示如下错误:
-
-```
-UNMET PEER DEPENDENCY webpack@2.2.0-rc.2
-```
-
-请不用在意, 因为html-webpack-plugin依赖webpack 2.1.0-beta版本, 而我们安装了2.2.0-rc版本, 因此报错了, 但实际使用并无影响. 等html-webpack-plugin升级版本后就没问题了.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/), 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
 
