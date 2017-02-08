@@ -295,16 +295,8 @@ export default class {
 我们把webpack和它的插件安装到项目:
 
 ```sh
-npm install webpack@2.2.0 webpack-dev-server@2.2.0 html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
+npm install webpack webpack-dev-server html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
-
-这里, 我们用`@2.2.0`指定了webpack版本号, 因为npm上的默认版本是1.14.0, 不指定的话默认会装1. 执行下面命令可以查看npm上的包的最新非默认版本:
-
-```sh
-npm show webpack versions --json
-```
-
-最后一个就是了.
 
 [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.
 
