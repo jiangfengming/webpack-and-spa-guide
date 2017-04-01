@@ -1474,7 +1474,7 @@ module.exports = (options = {}) => {
 ### 为什么不使用webpack.config.babel.js
 部分同学可能知道webpack可以读取webpack.config.babel.js, 它会先调用babel将文件编译后再执行. 但这里有两个坑:
 
-1. 由于我们的package.json中的babel配置指定了`modules: false`, 所以babel并不会转码`import`, 这导致编译后的webpack配置文件仍然无法在node.js中执行, 解决方案是package.json不指定`modules: false`, 而在babel-loader中的options中配置babel:
+1. 由于我们的package.json中的babel配置指定了`modules: false`, 所以babel并不会转码`import`, 这导致编译后的webpack配置文件仍然无法在node.js中执行, 解决方案是package.json不指定`modules: false`, 而在babel-loader中的options中配置babel. 这样webpack.config.babel.js会使用package.json的babel配置编译, 而webpack编译的js会使用babel-loader指定的配置编译.
 
 ```js
 {
@@ -1500,8 +1500,6 @@ module.exports = (options = {}) => {
   ]
 }
 ```
-
-这样webpack.config.babel.js会使用package.json的babel配置编译, 而webpack编译的js会使用babel-loader指定的配置编译.
 
 2. postcss的配置不支持先用babel转码, 这导致了我们的配置文件格式的不统一.
 
