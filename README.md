@@ -13,7 +13,7 @@
 
 是的, 即使是外国佬也在吐槽这文档不是人能看的. 回想起当年自己啃webpack文档的血与泪的往事, 觉得有必要整一个教程, 可以让大家看完后愉悦地搭建起一个webpack打包方案的项目.
 
-可能会有人问webpack到底有什么用, 你不能上来就糊我一脸代码让我马上搞, 我照着搞了一遍结果根本没什么naizi用, 都是骗人的. 所以, 在说webpack之前, 我想先谈一下前端打包方案这几年的演进历程, 在什么场景下, 我们遇到了什么问题, 催生出了应对这些问题的工具. 了解了需求和目的之后, 你就知道什么时候webpack可以帮到你. 我希望我用完之后很爽，你们用完之后也是.
+可能会有人问webpack到底有什么用, 你不能上来就糊我一脸代码让我马上搞, 我照着搞了一遍结果根本没什么naizi用, 都是骗人的. 所以, 在说webpack之前, 我想先谈一下前端打包方案这几年的演进历程, 在什么场景下, 我们遇到了什么问题, 催生出了应对这些问题的工具. 了解了需求和目的之后, 你就知道什么时候webpack可以帮到你. 我希望我用完之后很爽, 你们用完之后也是.
 
 ## 先说说前端打包方案的黑暗历史
 在很长的一段前端历史里, 是不存在打包这个说法的. 那个时候页面基本是纯静态的或者服务端输出的, 没有AJAX, 也没有jQuery. 那个时候的JavaScript就像个玩具, 用处大概就是在侧栏弄个时钟, 用media player放个mp3之类的脚本, 代码量不是很多, 直接放在`<script>`标签里或者弄个js文件引一下就行, 日子过得很轻松愉快.
@@ -56,7 +56,7 @@ var d = require('./d')
 module.exports = d.PI // 假设d.PI的值是3.14159
 ```
 
-那么`a.js`中的变量`c`就是数字`3.14159`, 具体的语法规范可以查看Node.js的[文档](https://nodejs.org/dist/latest-v6.x/docs/api/modules.html).
+那么`a.js`中的变量`c`就是数字`3.14159`, 具体的语法规范可以查看Node.js的[文档](https://nodejs.org/api/modules.html).
 
 
 但是CommonJS在浏览器内并不适用. 因为`require()`的返回是同步的, 意味着有多个依赖的话需要一个一个依次下载, 堵塞了js脚本的执行. 所以人们就在CommonJS的基础上定义了[Asynchronous Module Definition (AMD)](https://github.com/amdjs/amdjs-api)规范(2011年), 使用了异步回调的语法来并行下载多个依赖项, 比如作为入口的`a.js`可以这样写:
@@ -307,22 +307,22 @@ npm install webpack webpack-dev-server html-webpack-plugin html-loader css-loade
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/), 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
 
 ```sh
-npm install babel-core babel-preset-latest babel-loader --save-dev
+npm install babel-core babel-preset-env babel-loader --save-dev
 ```
 
-这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-latest](https://babeljs.io/docs/plugins/preset-latest/)是一个配置文件, 意思是转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装[babel-preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/):
+这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件, 我们可以使用这个配置文件转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装[babel-preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/):
 
 ```sh
 npm install babel-preset-es2015 --save-dev
 ```
 
-但是光安装了`babel-preset-latest`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
+但是光安装了`babel-preset-env`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
 
 ```json
 {
   "babel": {
     "presets": [
-      "latest"
+      "env"
     ]
   }
 }
@@ -581,6 +581,7 @@ npm run build
 * 配置favicon
 * 开发环境允许其他电脑访问
 * 打包时自定义部分参数
+* webpack-dev-server处理带后缀名的文件的特殊规则
 * 代码中插入环境变量
 * 简化import路径
 * 优化babel编译后的代码性能
@@ -642,7 +643,7 @@ npm install babel-eslint babel-preset-stage-2 --save-dev
 {
   "babel": {
     "presets": [
-      "latest",
+      "env",
       "stage-2"
     ]
   },
@@ -1107,13 +1108,22 @@ npm run dev --config=CONFIG_NAME
 还有一点, 我们不需要把自己个人用的配置文件提交到git, 所以我们在.gitignore中加入:
 
 ```
-conf/*
-!conf/default.js
-!conf/dev.js
+config/*
+!config/default.js
+!config/dev.js
 ```
 
-把`conf`目录排除掉, 但是保留生产环境和dev默认配置文件.
+把`config`目录排除掉, 但是保留生产环境和dev默认配置文件.
 
+### webpack-dev-server处理带后缀名的文件的特殊规则
+当处理带后缀名的请求时, 比如 http://localhost:8100/bar.do , webpack-dev-server会认为它应该是一个实际存在的文件, 就算找不到该文件, 也不会fallback到index.html, 而是返回404. 但在SPA应用中这不是我们希望的. 幸好webpack-dev-server有一个配置选项`disableDotRule: true`可以禁用这个规则, 使带后缀的文件当不存在时也能fallback到index.html
+
+```js
+historyApiFallback: {
+  index: url.parse(config.publicPath).pathname,
+  disableDotRule: true
+}
+```
 
 ### 代码中插入环境变量
 在业务代码中, 有些变量在开发环境和生产环境是不同的, 比如域名, 后台API地址等. 还有开发环境可能需要打印调试信息等.
@@ -1125,7 +1135,7 @@ conf/*
 const pkgInfo = require('./package.json')
 
 module.exports = (options = {}) => {
-  const config = require('./conf/' + (process.env.npm_config_config || options.config || 'default')).default
+  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default')).default
 
   return {
     // ...
@@ -1222,13 +1232,13 @@ resolve: {
 }
 ```
 
-这样, 我们可以从`~`为基础路径来`import`文件:
+这样, 我们可以以`src`目录为基础路径来`import`文件:
 
 ```js
 import b from '~/components/b'
 ```
 
-html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`root`参数, 可以使`/`开头的文件相对于`root`目录解析.
+html中的`<img>`标签没法使用这个别名功能, 但`html-loader`有一个`root`参数, 可以使`/`开头的文件相对于`root`目录解析.
 
 ```js
 {
@@ -1247,7 +1257,7 @@ html中的<img>标签没法使用这个别名功能, 但`html-loader`有一个`r
 
 那么, `<img src="/favicon.png">`就能顺利指向到src目录下的favicon.png文件, 不需要关心当前文件和目标文件的相对路径.
 
-PS: 在调试<img>标签的时候遇到一个坑, `htlm-loader`会解析`<!-- -->`注释中的内容, 之前在注释中写的
+PS: 在调试`<img>`标签的时候遇到一个坑, `html-loader`会解析`<!-- -->`注释中的内容, 之前在注释中写的
 
 ```html
 <!--
@@ -1269,7 +1279,7 @@ package.json:
   "babel": {
     "presets": [
       [
-        "latest",
+        "env",
         {
           "es2015": {
             "loose": true
@@ -1295,7 +1305,7 @@ package.json:
   "babel": {
     "presets": [
       [
-        "latest",
+        "env",
         {
           "es2015": {
             "loose": true,
@@ -1475,7 +1485,7 @@ module.exports = (options = {}) => {
       loader: 'babel-loader',
       options: {
         presets: [
-          ['latest', {
+          ['env', {
             es2015: {
               loose: true,
               modules: false
@@ -1508,4 +1518,4 @@ module.exports = (options = {}) => {
 
 
 ## 版权许可
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可。
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可.

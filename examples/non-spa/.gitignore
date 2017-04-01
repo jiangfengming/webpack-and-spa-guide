@@ -2,5 +2,5 @@ node_modules
 npm-debug.log*
 .DS_Store
 .idea
-conf/*
-!conf/default.js
+config/*
+!config/default.js
