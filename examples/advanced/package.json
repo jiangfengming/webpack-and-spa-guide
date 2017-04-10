@@ -36,10 +36,8 @@
       [
         "env",
         {
-          "es2015": {
-            "loose": true,
-            "modules": false
-          }
+          "loose": true,
+          "modules": false
         }
       ],
       "stage-2"

@@ -1270,7 +1270,7 @@ PS: 在调试`<img>`标签的时候遇到一个坑, `html-loader`会解析`<!-- 
 
 
 ### 优化babel编译后的代码性能
-babel编译后的代码一般会造成性能损失, babel提供了一个[loose](https://babeljs.io/docs/plugins/preset-es2015/#options)选项, 使编译后的代码不需要完全遵循ES6规定, 简化编译后的代码, 提高代码执行效率:
+babel编译后的代码一般会造成性能损失, babel提供了一个[loose](http://babeljs.io/docs/plugins/preset-env/#optionsloose)选项, 使编译后的代码不需要完全遵循ES6规定, 简化编译后的代码, 提高代码执行效率:
 
 package.json:
 
@@ -1281,9 +1281,7 @@ package.json:
       [
         "env",
         {
-          "es2015": {
-            "loose": true
-          }
+          "loose": true
         }
       ],
       "stage-2"
@@ -1307,10 +1305,8 @@ package.json:
       [
         "env",
         {
-          "es2015": {
-            "loose": true,
-            "modules": false
-          }
+          "loose": true,
+          "modules": false
         }
       ],
       "stage-2"
@@ -1486,10 +1482,8 @@ module.exports = (options = {}) => {
       options: {
         presets: [
           ['env', {
-            es2015: {
-              loose: true,
-              modules: false
-            }
+            loose: true,
+            modules: false
           }],
           'stage-2'
         ]
