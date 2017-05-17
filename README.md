@@ -589,7 +589,7 @@ npm run build
 * 使用autoprefixer自动创建css的vendor prefixes
 * 编译前清空dist目录
 
-那么, 让我们在上面的配置的基础上继续完善, 下面的代码我们只写出改变的部分.
+那么, 让我们在上面的配置的基础上继续完善, 下面的代码我们只写出改变的部分. 代码在[examples/advanced](examples/advanced)目录.
 
 
 ### 指定静态资源的url路径前缀
@@ -1390,10 +1390,10 @@ npm install rimraf --save-dev
 ```
 
 
-## 非SPA的展示型网页能否用webpack打包?
-对于展示型网页, 我们最多的是用Grunt或Gulp来打包, 因为这种简单的页面对模块化编程的需求不高. 但如果你喜欢上使用`import`来引入库, 那么我们仍然可以使用webpack来打包展示型网页.
+## 传统的多页面网站(MPA)能否用webpack打包?
+对于多页面网站, 我们最多的是用Grunt或Gulp来打包, 因为这种简单的页面对模块化编程的需求不高. 但如果你喜欢上使用`import`来引入库, 那么我们仍然可以使用webpack来打包.
 
-非SPA的页面意味着并没有一个单一的html入口和js入口, 而是每个页面对应一个html和多个js. 那么我们可以把项目结构设计为:
+MPA意味着并没不是一个单一的html入口和js入口, 而是每个页面对应一个html和多个js. 那么我们可以把项目结构设计为:
 
 ```
 ├── dist
@@ -1463,6 +1463,8 @@ module.exports = (options = {}) => {
   }
 }
 ```
+
+代码在[examples/mpa](examples/mpa)目录.
 
 
 ## 其他问题
