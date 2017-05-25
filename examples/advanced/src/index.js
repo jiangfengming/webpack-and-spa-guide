@@ -1,7 +1,7 @@
-import SpaHistory from 'spa-history'
+import PathHistory from 'spa-history/PathHistory'
 
-new SpaHistory({
-  onNavigate(location) {
+const history = new PathHistory({
+  change(location) {
     // 使用import()将加载的js文件分开打包, 这样实现了仅加载访问的页面
     import('./views' + location.path + '/index.js').then(module => {
       // export default ... 的内容通过module.default访问
@@ -11,3 +11,5 @@ new SpaHistory({
     })
   }
 })
+
+history.hookAnchorElements()

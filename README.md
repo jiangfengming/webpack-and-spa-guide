@@ -754,7 +754,7 @@ npm install spa-history --save
 然后在`vendor.js`中, 我们引用一下它:
 
 ```js
-import 'spa-history'
+import 'spa-history/PathHistory'
 ```
 
 我们`import`它但不需要做什么, 这样webpack打包的时候会把这个第三方库打包进`vendor.js.`
@@ -762,17 +762,21 @@ import 'spa-history'
 然后在`src/index.js`中, 我们使用它:
 
 ```js
-import SpaHistory from 'spa-history'
+import PathHistory from 'spa-history/PathHistory'
 
-new SpaHistory({
-  onNavigate(location) {
+const history = new PathHistory({
+  change(location) {
+    // 使用import()将加载的js文件分开打包, 这样实现了仅加载访问的页面
     import('./views' + location.path + '/index.js').then(module => {
+      // export default ... 的内容通过module.default访问
       const View = module.default
       const view = new View()
       view.mount(document.body)
     })
   }
 })
+
+history.hookAnchorElements()
 ```
 
 页面`foo`和`bar`的js和html文件因为路由的改变也要做些微调.
@@ -920,7 +924,7 @@ webpack配置中加入:
 
 
 ### 配置favicon
-在src目录中放一张favicon.png, 然后`src/index.html`的`<head>中插入:
+在src目录中放一张favicon.png, 然后`src/index.html`的`<head>`中插入:
 
 ```html
 <link rel="icon" type="image/png" href="favicon.png">
