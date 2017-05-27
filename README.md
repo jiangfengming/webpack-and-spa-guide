@@ -777,6 +777,7 @@ const history = new PathHistory({
 })
 
 history.hookAnchorElements()
+history.start()
 ```
 
 页面`foo`和`bar`的js和html文件因为路由的改变也要做些微调.

@@ -13,3 +13,4 @@ const history = new PathHistory({
 })
 
 history.hookAnchorElements()
+history.start()

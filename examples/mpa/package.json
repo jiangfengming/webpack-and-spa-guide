@@ -16,7 +16,7 @@
     "babel-loader": "^7.0.0",
     "babel-preset-env": "^1.5.1",
     "babel-preset-stage-2": "^6.24.1",
-    "css-loader": "^0.28.2",
+    "css-loader": "^0.28.3",
     "eslint": "^3.19.0",
     "eslint-config-enough": "^0.2.6",
     "eslint-loader": "^1.7.1",
@@ -28,7 +28,7 @@
     "rimraf": "^2.6.1",
     "style-loader": "^0.18.1",
     "url-loader": "^0.5.8",
-    "webpack": "^2.6.0",
+    "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5"
   },
   "babel": {
