@@ -587,7 +587,6 @@ npm run build
 * 优化babel编译后的代码性能
 * 使用webpack 2自带的ES6模块处理功能
 * 使用autoprefixer自动创建css的vendor prefixes
-* 编译前清空dist目录
 
 那么, 让我们在上面的配置的基础上继续完善, 下面的代码我们只写出改变的部分. 代码在[examples/advanced](examples/advanced)目录.
 
@@ -666,10 +665,11 @@ npm install babel-eslint babel-preset-stage-2 --save-dev
     /*
     import()加载的文件会被分开打包, 我们称这个包为chunk, chunkFilename用来配置这个chunk输出的文件名.
 
-    [id]: 编译时每个chunk会有一个id.
-    [chunkhash]: 这个chunk的hash值, 文件发生变化时该值也会变. 文件名加上该值可以防止浏览器读取旧的缓存文件.
+    [chunkhash]: 这个chunk的hash值, 文件发生变化时该值也会变. 使用[chunkhash]作为文件名可以防止浏览器读取旧的缓存文件.
+
+    还有一个占位符[id], 编译时每个chunk会有一个id. 我们在这里不使用它, 因为这个id是个递增的数字, 引入一个新的异步加载的文件或删掉一个, 都会导致其他文件的id发生改变, 导致缓存失效.
     */
-    chunkFilename: '[id].js?[chunkhash]',
+    chunkFilename: '[chunkhash].js',
   }
 }
 ```
@@ -708,7 +708,7 @@ webpack --env.dev --env.server localhost
 
 
 ### 输出的entry文件加上hash
-上面我们提到了chunkFilename可以加上[chunkhash]防止浏览器读取错误缓存, 那么entry同样需要加上hash. 但使用webpack-dev-server启动开发环境时, entry文件是没有[chunkhash]的, 用了会报错. 因此我们需要利用上面提到的区分开发环境和生产环境的功能, 只在打包生产环境代码时加上[chunkhash]
+上面我们提到了chunkFilename使用[chunkhash]防止浏览器读取错误缓存, 那么entry同样需要加上hash. 但使用webpack-dev-server启动开发环境时, entry文件是没有[chunkhash]的, 用了会报错. 因此我们需要利用上面提到的区分开发环境和生产环境的功能, 只在打包生产环境代码时加上[chunkhash]
 
 ```js
 module.exports = (options = {}) => {
@@ -725,15 +725,15 @@ module.exports = (options = {}) => {
       /*
       entry字段配置的入口js的打包输出文件名
       [name]作为占位符, 在输出时会被替换为entry里定义的属性名, 比如这里会被替换为"index"
-      [chunkhash]是打包后输出文件的hash值的占位符, 把?[chunkhash]跟在文件名后面可以防止浏览器使用缓存的过期内容,
+      [chunkhash]是打包后输出文件的hash值的占位符, 把[chunkhash]加入文件名可以防止浏览器使用缓存的过期内容,
       这里, webpack会生成以下代码插入到index.html中:
-      <script type="text/javascript" src="/assets/index.js?d835352892e6aac768bf"></script>
+      <script type="text/javascript" src="/assets/index.d835352892e6aac768bf.js"></script>
       这里/assets/目录前缀是output.publicPath配置的
 
       options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
-      因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在后面跟[chunkhash]
+      因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在文件名中加入[chunkhash]
       */
-      filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
+      filename: options.dev ? '[name].js' : '[name].[chunkhash].js',
     }
   }
 }
@@ -765,20 +765,32 @@ import 'spa-history/PathHistory'
 import PathHistory from 'spa-history/PathHistory'
 
 const history = new PathHistory({
-  change(location) {
+  async change(location) {
     // 使用import()将加载的js文件分开打包, 这样实现了仅加载访问的页面
-    import('./views' + location.path + '/index.js').then(module => {
-      // export default ... 的内容通过module.default访问
-      const View = module.default
-      const view = new View()
-      view.mount(document.body)
-    })
+    const module = await import('./views' + location.path + '/index.js')
+    // export default ... 的内容通过module.default访问
+    const View = module.default
+    const view = new View()
+    view.mount(document.body)
   }
 })
 
-history.hookAnchorElements()
+document.body.addEventListener('click', e => history.captureLinkClickEvent(e))
 history.start()
 ```
+
+这里我们用到了 [async/await](http://es6.ruanyifeng.com/#docs/async), 为了保证浏览器的兼容性, 我们安装一下polyfill:
+```sh
+npm install regenerator-runtime --save
+```
+
+然后在`vendor.js`中引入:
+
+```js
+import 'regenerator-runtime/runtime'
+import 'spa-history/PathHistory'
+```
+
 
 页面`foo`和`bar`的js和html文件因为路由的改变也要做些微调.
 
@@ -836,7 +848,7 @@ export default class {
 </div>
 ```
 
-然后最重要的webpack的配置需要修改一下:
+然后最重要的webpack的配置需要修改一下: (参见webpack官方文档: https://webpack.js.org/guides/caching/ )
 
 ```js
 // 引入webpack, 等会需要用
@@ -852,6 +864,13 @@ module.exports = (options = {}) => {
 
     plugins: [
       /*
+      使用文件路径的hash作为moduleId
+      webpack默认使用递增的数字作为moduleId, 如果引入了一个新文件或删掉一个文件, 会导致其他的文件的moduleId也发生改变,
+      这样未发生改变的文件在打包后会生成新的[chunkhash], 导致缓存失效
+      */
+      new webpack.HashedModuleIdsPlugin(),
+
+      /*
       使用CommonsChunkPlugin插件来处理重复代码
       因为vendor.js和index.js都引用了spa-history, 如果不处理的话, 两个文件里都会有spa-history包的代码,
       我们用CommonsChunkPlugin插件来使共同引用的文件只打包进vendor.js
@@ -862,7 +881,7 @@ module.exports = (options = {}) => {
         这里我们指定打包进vendor.js
 
         但这样还不够, 还记得那个chunkFilename参数吗? 这个参数指定了chunk的打包输出的名字,
-        我们设置为 [id].js?[chunkhash] 的格式. 那么打包时这个文件名存在哪里的呢?
+        我们设置为 [chunkhash].js 的格式. 那么打包时这个文件名存在哪里的呢?
         它就存在引用它的文件中. 这就意味着被引用的文件发生改变, 会导致引用的它文件也发生改变.
 
         然后CommonsChunkPlugin有个附加效果, 会把所有chunk的文件名记录到names指定的文件中.
@@ -973,9 +992,9 @@ webpack配置中加入:
               /*
               name: 指定文件输出名
               [name]是源文件名, 不包含后缀. [ext]为后缀. [hash]为源文件的hash值,
-              这里我们保持文件名, 在后面跟上hash, 防止浏览器读取过期的缓存文件.
+              我们加上[hash]防止浏览器读取过期的缓存文件.
               */
-              name: '[name].[ext]?[hash]'
+              name: '[name].[hash].[ext]'
             }
           }
         ]
@@ -1006,7 +1025,15 @@ webpack配置中加入:
 
 
 ### 开发环境允许其他电脑访问
-webpack配置`devServer.host`为`'0.0.0.0'`即可.
+
+```js
+{
+  devServer: {
+    host: '0.0.0.0',
+    disableHostCheck: true
+  }
+}
+```
 
 
 ### 打包时自定义部分参数
@@ -1063,7 +1090,7 @@ module.exports = config
   "scripts": {
     "local": "npm run dev --config=local",
     "dev": "webpack-dev-server -d --hot --env.dev --env.config dev",
-    "build": "rimraf dist && webpack -p"
+    "build": "webpack -p"
   }
 }
 ```
@@ -1374,23 +1401,6 @@ module.exports = {
   plugins: [
     require('autoprefixer')()
   ]
-}
-```
-
-### 编译前清空dist目录
-不清空的话上次编译生成的文件会遗留在dist目录中, 我们最好先把目录清空一下. macOS/Linux下可以用`rm -rf dist`搞定, 考虑到跨平台的需求, 我们可以用`rimraf`:
-
-```sh
-npm install rimraf --save-dev
-```
-
-`package.json`修改一下:
-
-```json
-{
-  "scripts": {
-    "build": "rimraf dist && webpack -p --env.config production"
-  },
 }
 ```
 

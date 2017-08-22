@@ -15,8 +15,8 @@ module.exports = (options = {}) => {
 
     output: {
       path: resolve(__dirname, 'dist'),
-      filename: options.dev ? '[name].js' : '[name].js?[chunkhash]',
-      chunkFilename: '[id].js?[chunkhash]',
+      filename: options.dev ? '[name].js' : '[name].[chunkhash].js',
+      chunkFilename: '[chunkhash].js',
       publicPath: config.publicPath
     },
 
@@ -52,7 +52,7 @@ module.exports = (options = {}) => {
             {
               loader: 'file-loader',
               options: {
-                name: '[name].[ext]?[hash]'
+                name: '[name].[hash].[ext]'
               }
             }
           ]
@@ -78,6 +78,8 @@ module.exports = (options = {}) => {
         template: 'src/index.html'
       }),
 
+      new webpack.HashedModuleIdsPlugin(),
+
       new webpack.optimize.CommonsChunkPlugin({
         names: ['vendor', 'manifest']
       }),
@@ -97,6 +99,7 @@ module.exports = (options = {}) => {
 
     devServer: config.devServer ? {
       host: '0.0.0.0',
+      disableHostCheck: true,
       port: config.devServer.port,
       proxy: config.devServer.proxy,
       historyApiFallback: {
