@@ -1,17 +1,21 @@
-# webpack 2 打包实战
+# webpack 3 打包实战
 
 ![webpack](assets/webpack.png)
 
 ## 写在开头
-先说说为什么要写这篇文章, 最初的原因是组里的小朋友们看了[webpack](https://webpack.js.org/)文档后, 表情都是这样的: (摘自webpack[一篇文档](http://webpack.github.io/docs/usage.html)的评论区)
+~~先说说为什么要写这篇文章, 最初的原因是组里的小朋友们看了[webpack](https://webpack.js.org/)文档后, 表情都是这样的: (摘自webpack[一篇文档](http://webpack.github.io/docs/usage.html)的评论区)~~
 
 ![WTF](assets/wtf.jpg)
 
-和这样的:
+~~和这样的:~~
 
 ![You Couldn't Handle Me](assets/couldn't-handle.jpg)
 
-是的, 即使是外国佬也在吐槽这文档不是人能看的. 回想起当年自己啃webpack文档的血与泪的往事, 觉得有必要整一个教程, 可以让大家看完后愉悦地搭建起一个webpack打包方案的项目.
+~~是的, 即使是外国佬也在吐槽这文档不是人能看的. 回想起当年自己啃webpack文档的血与泪的往事, 觉得有必要整一个教程, 可以让大家看完后愉悦地搭建起一个webpack打包方案的项目.~~
+
+
+官网新的[webpack](https://webpack.js.org/)文档现在写的很详细了，能看英文的小伙伴可以直接去看官网。～
+
 
 可能会有人问webpack到底有什么用, 你不能上来就糊我一脸代码让我马上搞, 我照着搞了一遍结果根本没什么naizi用, 都是骗人的. 所以, 在说webpack之前, 我想先谈一下前端打包方案这几年的演进历程, 在什么场景下, 我们遇到了什么问题, 催生出了应对这些问题的工具. 了解了需求和目的之后, 你就知道什么时候webpack可以帮到你. 我希望我用完之后很爽, 你们用完之后也是.
 
@@ -585,7 +589,7 @@ npm run build
 * 代码中插入环境变量
 * 简化import路径
 * 优化babel编译后的代码性能
-* 使用webpack 2自带的ES6模块处理功能
+* 使用webpack自带的ES6模块处理功能
 * 使用autoprefixer自动创建css的vendor prefixes
 
 那么, 让我们在上面的配置的基础上继续完善, 下面的代码我们只写出改变的部分. 代码在[examples/advanced](examples/advanced)目录.
@@ -1325,7 +1329,7 @@ package.json:
 但这么做会有兼容性的风险, 可能会导致ES6源码理应的执行结果和编译后的ES5代码的实际结果并不一致. 如果代码没有遇到实际的效率瓶颈, 官方[不建议](http://www.2ality.com/2015/12/babel6-loose-mode.html)使用`loose`模式.
 
 
-### 使用webpack 2自带的ES6模块处理功能
+### 使用webpack自带的ES6模块处理功能
 我们目前的配置, babel会把ES6模块定义转为CommonJS定义, 但webpack自己可以处理`import`和`export`, 而且webpack处理`import`时会做代码优化, 把没用到的部分代码删除掉. 因此我们通过babel提供的`modules: false`选项把ES6模块转为CommonJS模块的功能给关闭掉.
 
 package.json:
