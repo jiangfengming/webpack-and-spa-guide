@@ -1,4 +1,6 @@
-# webpack 3 打包实战
+# webpack 4 打包实战
+
+> webpack 更新到了4.0, 官网还没有更新文档. 因此把教程更新一下, 方便大家用起webpack 4.
 
 ![webpack](assets/webpack.png)
 
@@ -14,7 +16,7 @@
 ~~是的, 即使是外国佬也在吐槽这文档不是人能看的. 回想起当年自己啃webpack文档的血与泪的往事, 觉得有必要整一个教程, 可以让大家看完后愉悦地搭建起一个webpack打包方案的项目.~~
 
 
-官网新的[webpack](https://webpack.js.org/)文档现在写的很详细了，能看英文的小伙伴可以直接去看官网。～
+官网新的[webpack](https://webpack.js.org/)文档现在写的很详细了，能看英文的小伙伴可以直接去看官网.～
 
 
 可能会有人问webpack到底有什么用, 你不能上来就糊我一脸代码让我马上搞, 我照着搞了一遍结果根本没什么naizi用, 都是骗人的. 所以, 在说webpack之前, 我想先谈一下前端打包方案这几年的演进历程, 在什么场景下, 我们遇到了什么问题, 催生出了应对这些问题的工具. 了解了需求和目的之后, 你就知道什么时候webpack可以帮到你. 我希望我用完之后很爽, 你们用完之后也是.
@@ -250,6 +252,8 @@ class Router {
 
   // 加载path路径的页面
   load(path) {
+    // 首页
+    if (path === '/') path = '/foo'
     // 创建页面实例
     const view = new routes[path]()
     // 调用页面方法, 把页面加载到document.body中
@@ -299,13 +303,12 @@ export default class {
 我们把webpack和它的插件安装到项目:
 
 ```sh
-npm install webpack webpack-dev-server html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
+npm install webpack webpack-cli webpack-dev-server html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
-
-[webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.
-
-[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.
-
+[webpack](https://github.com/webpack/webpack)即webpack核心库. 它提供了很多[API](https://webpack.js.org/api/node/), 通过Node.js脚本中`require('webpack')`的方式来使用webpack.
+[webpack-cli](https://github.com/webpack/webpack-cli)是webpack的命令行工具. 让我们可以不用写打包脚本, 只需配置打包配置文件, 然后在命令行输入`webpack-cli --config webpack.config.js`来使用webpack, 简单很多. webpack 4之前命令行工具是集成在webpack包中的, 4.0开始webpack包本身不再集成cli.  
+[webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.  
+[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.  
 [file-loader](https://github.com/webpack/file-loader)和[url-loader](https://github.com/webpack/url-loader)是打包二进制文件的插件, 具体也在配置文件章节讲解.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/), 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
@@ -314,37 +317,19 @@ npm install webpack webpack-dev-server html-webpack-plugin html-loader css-loade
 npm install babel-core babel-preset-env babel-loader --save-dev
 ```
 
-这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件, 我们可以使用这个配置文件转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/). 如果只想用ES6, 可以安装[babel-preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/):
+这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件, 我们可以使用这个配置文件转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/).  
 
-```sh
-npm install babel-preset-es2015 --save-dev
-```
-
-但是光安装了`babel-preset-env`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
+光安装了`babel-preset-env`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
 
 ```json
 {
   "babel": {
-    "presets": [
-      "env"
-    ]
+    "presets": ["env"]
   }
 }
 ```
 
-打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.
-
-如果使用`babel-preset-es2015`, 这里相应的也要修改为:
-
-```json
-{
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
-  }
-}
-```
+打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.  
 
 [babel-loader](https://github.com/babel/babel-loader)是webpack的插件, 我们下面章节再说.
 
@@ -507,7 +492,7 @@ module.exports = {
 配置OK了, 接下来我们就运行一下吧. 我们先试一下开发环境用的webpack-dev-server:
 
 ```sh
-./node_modules/.bin/webpack-dev-server -d --hot
+./node_modules/.bin/webpack-dev-server --mode development --hot
 ```
 
 上面的命令适用于Mac/Linux等*nix系统, 也适用于Windows上的PowerShell和bash/zsh环境([Bash on Wbuntu on Windows](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), [Git Bash](https://git-scm.com/downloads), [Babun](http://babun.github.io/), [MSYS2](http://msys2.github.io/)等).
@@ -515,24 +500,24 @@ module.exports = {
 如果使用Windows的cmd.exe, 请执行:
 
 ```
-node_modules\.bin\webpack-dev-server -d --hot
+node_modules\.bin\webpack-dev-server --mode development --hot
 ```
 
 我在这里安利Windows同学使用`Bash on Ubuntu on Windows`, 可以避免很多跨平台的问题, 比如设置环境变量.
 
 npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以我们要在这个目录下执行命令.
 
-`-d`参数是开发环境(Development)的意思, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug, 打开sourceMap, 代码中插入源文件路径注释.
+`--mode development`参数是将webpack设置为开发环境模式, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug, 打开sourceMap, 代码中插入源文件路径注释等.
 
 `--hot`开启热更新功能, 参数会帮我们往配置里添加`HotModuleReplacementPlugin`插件, 虽然可以在配置里自己写, 但有点麻烦, 用命令行参数方便很多.
 
-命令执行后, 控制台的最后一行应该是
+命令执行后, 控制台显示
 
 ```
-webpack: bundle is now VALID.
+｢wdm｣: Compiled successfully.
 ```
 
-这就代表编译成功了, 我们可以在浏览器打开 `http://localhost:8100/foo` 看看效果. 如果有报错, 那可能是什么地方没弄对? 请自己仔细检查一下~
+这就代表编译成功了, 我们可以在浏览器打开 `http://localhost:8100/` 看看效果. 如果有报错, 那可能是什么地方没弄对? 请自己仔细检查一下~
 
 我们可以随意更改一下src目录下的源代码, 保存后, 浏览器里的页面应该很快会有相应变化.
 
@@ -541,18 +526,18 @@ webpack: bundle is now VALID.
 开发环境编译试过之后, 我们试试看编译生产环境的代码, 命令是:
 
 ```sh
-./node_modules/.bin/webpack -p
+./node_modules/.bin/webpack-cli --mode production
 ```
 
-`-p`参数会开启生产环境模式, 这个模式下webpack会将代码做压缩等优化.
+`--mode production`参数会开启生产环境模式, 这个模式下webpack会将代码做压缩等优化.
 
 大家可能会发现, 执行脚本的命令有点麻烦. 因此, 我们可以利用npm的特性, 把命令写在`package.json`中:
 
 ```json
 {
   "scripts": {
-    "dev": "webpack-dev-server -d --hot --env.dev",
-    "build": "webpack -p"
+    "dev": "webpack-dev-server --mode development --hot --env.dev",
+    "build": "webpack-cli --mode production"
   }
 }
 ```

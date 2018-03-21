@@ -33,6 +33,8 @@ class Router {
 
   // 加载path路径的页面
   load(path) {
+    // 首页
+    if (path === '/') path = '/foo'
     // 创建页面实例
     const view = new routes[path]()
     // 调用页面方法, 把页面加载到document.body中
