@@ -563,7 +563,7 @@ npm run build
 上面的项目虽然可以跑起来了, 但有几个点我们还没有考虑到:
 * 指定静态资源的url路径前缀
 * 各个页面分开打包
-* 打包时区分开发环境和生产环境
+* 配置文件读取命令行参数
 * 输出的entry文件加上hash
 * 第三方库和业务代码分开打包
 * 开发环境关闭performance.hints
@@ -619,10 +619,10 @@ load(path) {
 
 这样我们就不需要在开头把所有页面文件都import进来了.
 
-因为`import()`还没有正式进入标准, 因此babel和eslint需要插件来支持它:
+因为`import()`还没有正式进入标准, 需要使用[babel-preset-stage-2](https://babeljs.io/docs/plugins/preset-stage-2/)来支持:
 
 ```sh
-npm install babel-eslint babel-preset-stage-2 --save-dev
+npm install babel-preset-stage-2 --save-dev
 ```
 
 `package.json`改一下:
@@ -634,14 +634,6 @@ npm install babel-eslint babel-preset-stage-2 --save-dev
       "env",
       "stage-2"
     ]
-  },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "extends": "enough",
-    "env": {
-      "browser": true,
-      "node": true
-    }
   }
 }
 ```
@@ -664,21 +656,33 @@ npm install babel-eslint babel-preset-stage-2 --save-dev
 ```
 
 
-### 打包时区分开发环境和生产环境
+### 配置文件读取命令行参数
 如果webpack.config.js导出的是一个function, 那么webpack会执行它, 并把返回的结果作为配置对象.
 
 ```js
-module.exports = (options = {}) => {
+module.exports = (env = {}, argv) => {
+  const dev = argv.mode === 'development'
+
   return {
     // 配置内容
   }
 }
 ```
 
-该function接受一个参数, 这个参数的值是由命令行传入的. 比如当我们在命令行中执行:
+该function接受两个参数:  
+`env`: 通过`--env`传入的参数, 语法如下:
+
+命令                              |    env
+---------------------------------|----------
+webpack-cli --env cordova        |    'cordova'
+webpack-cli --env.cordova        |    { cordova: true }
+webpack-cli --env.cordova=1 --env.expirement-feature=foo   
+
+`argv`: 
+ 这些参数的值是由命令行传入的. 比如当我们在命令行中执行:
 
 ```sh
-webpack --env.dev --env.server localhost
+webpack-cli --mode production --env.dev --env.server localhost
 ```
 
 那么options值为 `{ dev: true, server: 'localhost' }`
@@ -700,7 +704,9 @@ webpack --env.dev --env.server localhost
 上面我们提到了chunkFilename使用[chunkhash]防止浏览器读取错误缓存, 那么entry同样需要加上hash. 但使用webpack-dev-server启动开发环境时, entry文件是没有[chunkhash]的, 用了会报错. 因此我们需要利用上面提到的区分开发环境和生产环境的功能, 只在打包生产环境代码时加上[chunkhash]
 
 ```js
-module.exports = (options = {}) => {
+module.exports = (env = {}, argv) => {
+  const dev = argv.mode === 'development'
+
   return {
     /*
     这里entry我们改用对象来定义
@@ -719,10 +725,10 @@ module.exports = (options = {}) => {
       <script type="text/javascript" src="/assets/index.d835352892e6aac768bf.js"></script>
       这里/assets/目录前缀是output.publicPath配置的
 
-      options.dev是命令行传入的参数. 这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
-      因此我们不得已在使用webpack-dev-server启动项目时, 命令行跟上--env.dev参数, 当有该参数时, 不在文件名中加入[chunkhash]
+      这里是由于使用webpack-dev-server启动开发环境时, 是没有[chunkhash]的, 用了会报错
+      因此我们不得已在使用webpack-dev-server启动项目时, 不在文件名中加入[chunkhash]
       */
-      filename: options.dev ? '[name].js' : '[name].[chunkhash].js',
+      filename: dev ? '[name].js' : '[name].[chunkhash].js',
     }
   }
 }

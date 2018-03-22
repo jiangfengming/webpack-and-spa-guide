@@ -4,18 +4,25 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const pkgInfo = require('./package.json')
 const url = require('url')
 
-module.exports = (options = {}) => {
-  const config = require('./config/' + (process.env.npm_config_config || options.config || 'default'))
+module.exports = (env = {}, argv) => {
+  const dev = argv.mode === 'development'
+  const config = require('./config/' + (process.env.npm_config_config || env.config || 'default'))
 
   return {
     entry: {
-      vendor: './src/vendor',
       index: './src/index'
+    },
+
+    optimization: {
+      runtimeChunk: true,
+      splitChunks: {
+        chunks: 'all'
+      }
     },
 
     output: {
       path: resolve(__dirname, 'dist'),
-      filename: options.dev ? '[name].js' : '[name].[chunkhash].js',
+      filename: dev ? '[name].js' : '[name].[chunkhash].js',
       chunkFilename: '[chunkhash].js',
       publicPath: config.publicPath
     },
@@ -75,17 +82,14 @@ module.exports = (options = {}) => {
 
     plugins: [
       new HtmlWebpackPlugin({
-        template: 'src/index.html'
+        template: 'src/index.html',
+        chunksSortMode: 'none'
       }),
 
       new webpack.HashedModuleIdsPlugin(),
 
-      new webpack.optimize.CommonsChunkPlugin({
-        names: ['vendor', 'manifest']
-      }),
-
       new webpack.DefinePlugin({
-        DEBUG: Boolean(options.dev),
+        DEBUG: Boolean(dev),
         VERSION: JSON.stringify(pkgInfo.version),
         CONFIG: JSON.stringify(config.runtimeConfig)
       })
@@ -109,7 +113,7 @@ module.exports = (options = {}) => {
     } : undefined,
 
     performance: {
-      hints: options.dev ? false : 'warning'
+      hints: dev ? false : 'warning'
     }
   }
 }
