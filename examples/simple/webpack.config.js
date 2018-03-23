@@ -1,7 +1,19 @@
 const { resolve } = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const history = require('connect-history-api-fallback')
+const convert = require('koa-connect')
+
+// 使用WEBPACK_SERVE环境变量检测当前是否是在webpack-server启动的开发环境中
+const dev = Boolean(process.env.WEBPACK_SERVE)
 
 module.exports = {
+  /*
+  webpack执行模式
+  development: 开发环境, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug, 打开sourceMap, 代码中插入源文件路径注释等
+  production: 生产环境, webpack会将代码做压缩等优化
+  */
+  mode: dev ? 'development' : 'production',
+
   // 配置页面入口js文件
   entry: './src/index.js',
 
@@ -120,28 +132,37 @@ module.exports = {
       */
       template: './src/index.html'
     })
-  ],
+  ]
+}
 
-  /*
-  配置开发时用的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试
-  并且带有热更新的功能, 打代码时保存一下文件, 浏览器会自动刷新. 比nginx方便很多
-  如果是修改css, 甚至不需要刷新页面, 直接生效. 这让像弹框这种需要点击交互后才会出来的东西调试起来方便很多.
-  */
-  devServer: {
-    // 配置监听端口, 因为8080很常用, 为了避免和其他程序冲突, 我们配个其他的端口号
-    port: 8100,
+/*
+配置开发时用的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试
+并且带有热更新的功能, 打代码时保存一下文件, 浏览器会自动刷新. 比nginx方便很多
+如果是修改css, 甚至不需要刷新页面, 直接生效. 这让像弹框这种需要点击交互后才会出来的东西调试起来方便很多.
 
-    /*
-    historyApiFallback用来配置页面的重定向
+因为webpack-cli无法正确识别serve选项, 使用webpack-cli执行打包时会报错.
+因此我们在这里判断一下, 仅当使用webpack-serve时插入serve选项.
+issue: https://github.com/webpack-contrib/webpack-serve/issues/19
+*/
+if (dev) {
+  module.exports.serve = {
+    // 配置监听端口, 默认值8080
+    port: 8080,
 
-    SPA的入口是一个统一的html文件, 比如
-    http://localhost:8010/foo
-    我们要返回给它
-    http://localhost:8010/index.html
-    这个文件
+    // add: 用来给服务器的koa实例注入middleware增加功能
+    add: app => {
+      /*
+      配置SPA入口
 
-    配置为true, 当访问的文件不存在时, 返回根目录下的index.html文件
-    */
-    historyApiFallback: true
+      SPA的入口是一个统一的html文件, 比如
+      http://localhost:8080/foo
+      我们要返回给它
+      http://localhost:8080/index.html
+      这个文件
+
+      参考: https://github.com/webpack-contrib/webpack-serve/blob/master/docs/addons/history-fallback.config.js
+      */
+      app.use(convert(history()))
+    }
   }
 }

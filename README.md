@@ -670,13 +670,13 @@ module.exports = (env = {}, argv) => {
 ```
 
 该function接受两个参数:  
-`env`: 通过`--env`传入的参数, 语法如下:
+`env`: 通过`--env`传入的参数, 接受如下语法:
 
-命令                              |    env
----------------------------------|----------
-webpack-cli --env cordova        |    'cordova'
-webpack-cli --env.cordova        |    { cordova: true }
-webpack-cli --env.cordova=1 --env.expirement-feature=foo   
+命令                      |    env
+--------------------------|---------------------------------------
+webpack-cli --env cordova | 'cordova'
+webpack-cli --env.cordova --env.build=stage --env.feature=foo --env.feature=bar --env.port | { cordova: true, build: 'stage', feature: ['foo', 'bar'] }
+
 
 `argv`: 
  这些参数的值是由命令行传入的. 比如当我们在命令行中执行:

@@ -1,8 +1,8 @@
 module.exports = {
   runtimeConfig: {
     experimentalFeatures: {
-      featureFoo: false,
-      featureBar: true
+      foo: false,
+      bar: false
     },
 
     thirdPartyApiKey: 'gfdsa654321'
