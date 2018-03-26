@@ -9,10 +9,17 @@ const dev = Boolean(process.env.WEBPACK_SERVE)
 module.exports = {
   /*
   webpack执行模式
-  development: 开发环境, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug, 打开sourceMap, 代码中插入源文件路径注释等
+  development: 开发环境, 它会在配置文件中插入调试相关的选项, 比如moduleId使用文件路径方便调试
   production: 生产环境, webpack会将代码做压缩等优化
   */
   mode: dev ? 'development' : 'production',
+
+  /*
+  配置source map
+  开发模式下使用cheap-module-eval-source-map, 生成的source map能和源码每行对应, 方便打断点调试
+  生产模式下使用hidden-source-map, 生成独立的source map文件, 并且不在js文件中插入source map路径, 用于在error report工具中查看 (比如Sentry)
+  */
+  devtool: dev ? 'cheap-module-eval-source-map' : 'hidden-source-map',
 
   // 配置页面入口js文件
   entry: './src/index.js',
@@ -159,8 +166,6 @@ if (dev) {
       我们要返回给它
       http://localhost:8080/index.html
       这个文件
-
-      参考: https://github.com/webpack-contrib/webpack-serve/blob/master/docs/addons/history-fallback.config.js
       */
       app.use(convert(history()))
     }

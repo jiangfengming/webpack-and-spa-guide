@@ -4,7 +4,7 @@
   "description": "A simple webpack example",
   "main": "",
   "scripts": {
-    "dev": "webpack-serve ./webpack.config.js",
+    "dev": "webpack-serve webpack.config.js",
     "build": "webpack-cli"
   },
   "author": "",

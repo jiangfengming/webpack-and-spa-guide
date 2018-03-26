@@ -1,4 +1,4 @@
-# webpack 4 打包实战
+# Single-Page Application 和 Webpack 4 入门
 
 > webpack 更新到了4.0, 官网还没有更新文档. 因此把教程更新一下, 方便大家用起webpack 4.
 
@@ -214,12 +214,19 @@ npm install
 
 它是一个空白页面, 注意这里我们不需要自己写`<script src="index.js"></script>`, 因为打包后的文件名和路径可能会变, 所以我们用webpack插件帮我们自动加上.
 
-然后重点是`src/index.js`:
+src/index.js:
 
 ```js
-// 引入作为全局对象储存空间的global.js, js文件可以省略后缀
-import g from './global'
+// 引入router
+import router from './router'
 
+// 启动router
+router.start()
+```
+
+src/router.js:
+
+```js
 // 引入页面文件
 import foo from './views/foo'
 import bar from './views/bar'
@@ -242,7 +249,7 @@ class Router {
     this.load(location.pathname)
   }
 
-  // 前往path, 会变更地址栏URL, 并加载相应页面
+  // 前往path, 变更地址栏URL, 并加载相应页面
   go(path) {
     // 变更地址栏URL
     history.pushState({}, '', path)
@@ -261,17 +268,15 @@ class Router {
   }
 }
 
-// new一个路由对象, 赋值为g.router, 这样我们在其他js文件中可以引用到
-g.router = new Router()
-// 启动
-g.router.start()
+// 导出router实例
+export default new Router()
 ```
 
-现在我们还没有讲webpack配置所以页面还无法访问, 我们先从理论上讲解一下, 等会弄好webpack配置后再实际看页面效果. 当我们访问 `http://localhost:8100/foo` 的时候, 路由会加载 `./views/foo/index.js`文件, 我们来看看这个文件:
+src/views/foo/index.js:
 
 ```js
-// 引入全局对象
-import g from '../../global'
+// 引入router
+import router from '../../router'
 
 // 引入html模板, 会被作为字符串引入
 import template from './index.html'
@@ -286,7 +291,32 @@ export default class {
     container.innerHTML = template
     container.querySelector('.foo__gobar').addEventListener('click', () => {
       // 调用router.go方法加载 /bar 页面
-      g.router.go('/bar')
+      router.go('/bar')
+    })
+  }
+}
+```
+
+src/views/bar/index.js:
+
+```js
+// 引入router
+import router from '../../router'
+
+// 引入html模板, 会被作为字符串引入
+import template from './index.html'
+
+// 引入css, 会生成<style>块插入到<head>头中
+import './style.css'
+
+// 导出类
+export default class {
+  mount(container) {
+    document.title = 'bar'
+    container.innerHTML = template
+    container.querySelector('.bar__gofoo').addEventListener('click', () => {
+      // 调用router.go方法加载 /foo 页面
+      router.go('/foo')
     })
   }
 }
@@ -296,18 +326,17 @@ export default class {
 
 其他的`src`目录下的文件大家自己浏览, 拷贝一份到自己的工作目录, 等会打包时会用到.
 
-页面代码这样就差不多搞定了, 接下来我们进入webpack的安装和配置阶段.
-
+页面代码这样就差不多搞定了, 接下来我们进入webpack的安装和配置阶段. 现在我们还没有讲webpack配置所以页面还无法访问, 等会弄好webpack配置后再看页面实际效果.
 
 ### 安装webpack和Babel
 我们把webpack和它的插件安装到项目:
 
 ```sh
-npm install webpack webpack-cli webpack-dev-server html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
+npm install webpack webpack-cli webpack-serve html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
 [webpack](https://github.com/webpack/webpack)即webpack核心库. 它提供了很多[API](https://webpack.js.org/api/node/), 通过Node.js脚本中`require('webpack')`的方式来使用webpack.
 [webpack-cli](https://github.com/webpack/webpack-cli)是webpack的命令行工具. 让我们可以不用写打包脚本, 只需配置打包配置文件, 然后在命令行输入`webpack-cli --config webpack.config.js`来使用webpack, 简单很多. webpack 4之前命令行工具是集成在webpack包中的, 4.0开始webpack包本身不再集成cli.  
-[webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.  
+[webpack-serve](https://github.com/webpack-contrib/webpack-serve)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.  
 [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.  
 [file-loader](https://github.com/webpack/file-loader)和[url-loader](https://github.com/webpack/url-loader)是打包二进制文件的插件, 具体也在配置文件章节讲解.
 
@@ -335,13 +364,32 @@ npm install babel-core babel-preset-env babel-loader --save-dev
 
 
 ### 配置webpack
-包都装好了, 接下来, 总算可以进入正题了, 是不是有点心累...呵呵. 我们来创建webpack配置文件`webpack.config.js`, 注意这个文件是在node.js中运行的, 因此不支持ES6的`import`语法. 我们来看文件内容:
+包都装好了, 接下来总算可以进入正题了. 我们来创建webpack配置文件`webpack.config.js`, 注意这个文件是在node.js中运行的, 因此不支持ES6的`import`语法. 我们来看文件内容:
 
 ```js
 const { resolve } = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const history = require('connect-history-api-fallback')
+const convert = require('koa-connect')
+
+// 使用WEBPACK_SERVE环境变量检测当前是否是在webpack-server启动的开发环境中
+const dev = Boolean(process.env.WEBPACK_SERVE)
 
 module.exports = {
+  /*
+  webpack执行模式
+  development: 开发环境, 它会在配置文件中插入调试相关的选项, 比如moduleId使用文件路径方便调试
+  production: 生产环境, webpack会将代码做压缩等优化
+  */
+  mode: dev ? 'development' : 'production',
+
+  /*
+  配置source map
+  开发模式下使用cheap-module-eval-source-map, 生成的source map能和源码每行对应, 方便打断点调试
+  生产模式下使用hidden-source-map, 生成独立的source map文件, 并且不在js文件中插入source map路径, 用于在error report工具中查看 (比如Sentry)
+  */
+  devtool: dev ? 'cheap-module-eval-source-map' : 'hidden-source-map',
+
   // 配置页面入口js文件
   entry: './src/index.js',
 
@@ -384,7 +432,7 @@ module.exports = {
         test: /\.html$/,
         /*
         使用html-loader, 将html内容存为js字符串, 比如当遇到
-        import htmlString from './template.html'
+        import htmlString from './template.html';
         template.html的文件内容会被转成一个js字符串, 合并到js文件里.
         */
         use: 'html-loader'
@@ -460,56 +508,59 @@ module.exports = {
       */
       template: './src/index.html'
     })
-  ],
+  ]
+}
 
-  /*
-  配置开发时用的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试
-  并且带有热更新的功能, 打代码时保存一下文件, 浏览器会自动刷新. 比nginx方便很多
-  如果是修改css, 甚至不需要刷新页面, 直接生效. 这让像弹框这种需要点击交互后才会出来的东西调试起来方便很多.
-  */
-  devServer: {
-    // 配置监听端口, 因为8080很常用, 为了避免和其他程序冲突, 我们配个其他的端口号
-    port: 8100,
+/*
+配置开发时用的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试
+并且带有热更新的功能, 打代码时保存一下文件, 浏览器会自动刷新. 比nginx方便很多
+如果是修改css, 甚至不需要刷新页面, 直接生效. 这让像弹框这种需要点击交互后才会出来的东西调试起来方便很多.
 
-    /*
-    historyApiFallback用来配置页面的重定向
+因为webpack-cli无法正确识别serve选项, 使用webpack-cli执行打包时会报错.
+因此我们在这里判断一下, 仅当使用webpack-serve时插入serve选项.
+issue: https://github.com/webpack-contrib/webpack-serve/issues/19
+*/
+if (dev) {
+  module.exports.serve = {
+    // 配置监听端口, 默认值8080
+    port: 8080,
 
-    SPA的入口是一个统一的html文件, 比如
-    http://localhost:8010/foo
-    我们要返回给它
-    http://localhost:8010/index.html
-    这个文件
+    // add: 用来给服务器的koa实例注入middleware增加功能
+    add: app => {
+      /*
+      配置SPA入口
 
-    配置为true, 当访问的文件不存在时, 返回根目录下的index.html文件
-    */
-    historyApiFallback: true
+      SPA的入口是一个统一的html文件, 比如
+      http://localhost:8080/foo
+      我们要返回给它
+      http://localhost:8080/index.html
+      这个文件
+      */
+      app.use(convert(history()))
+    }
   }
 }
 ```
 
 
 ### 走一个
-配置OK了, 接下来我们就运行一下吧. 我们先试一下开发环境用的webpack-dev-server:
+配置OK了, 接下来我们就运行一下吧. 我们先试一下开发环境用的webpack-serve:
 
 ```sh
-./node_modules/.bin/webpack-dev-server --mode development --hot
+./node_modules/.bin/webpack-serve webpack.config.js
 ```
+执行时需要指定配置文件.
 
-上面的命令适用于Mac/Linux等*nix系统, 也适用于Windows上的PowerShell和bash/zsh环境([Bash on Wbuntu on Windows](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), [Git Bash](https://git-scm.com/downloads), [Babun](http://babun.github.io/), [MSYS2](http://msys2.github.io/)等).
+上面的命令适用于Mac/Linux等*nix系统, 也适用于Windows上的PowerShell和bash/zsh环境([Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10), [Git Bash](https://git-scm.com/downloads), [Babun](http://babun.github.io/), [MSYS2](http://msys2.github.io/)等). 安利一下Windows同学使用[Ubuntu on Windows](https://www.microsoft.com/store/p/ubuntu/9nblggh4msv6), 可以避免很多跨平台的问题, 比如设置环境变量.
 
 如果使用Windows的cmd.exe, 请执行:
 
 ```
-node_modules\.bin\webpack-dev-server --mode development --hot
+node_modules\.bin\webpack-serve webpack.config.js
 ```
 
-我在这里安利Windows同学使用`Bash on Ubuntu on Windows`, 可以避免很多跨平台的问题, 比如设置环境变量.
 
 npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以我们要在这个目录下执行命令.
-
-`--mode development`参数是将webpack设置为开发环境模式, 它会在我们的配置文件中插入调试相关的选项, 比如打开debug, 打开sourceMap, 代码中插入源文件路径注释等.
-
-`--hot`开启热更新功能, 参数会帮我们往配置里添加`HotModuleReplacementPlugin`插件, 虽然可以在配置里自己写, 但有点麻烦, 用命令行参数方便很多.
 
 命令执行后, 控制台显示
 
@@ -517,7 +568,7 @@ npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以�
 ｢wdm｣: Compiled successfully.
 ```
 
-这就代表编译成功了, 我们可以在浏览器打开 `http://localhost:8100/` 看看效果. 如果有报错, 那可能是什么地方没弄对? 请自己仔细检查一下~
+这就代表编译成功了, 我们可以在浏览器打开 `http://localhost:8080/` 看看效果. 如果有报错, 那可能是什么地方没弄对? 请自己仔细检查一下~
 
 我们可以随意更改一下src目录下的源代码, 保存后, 浏览器里的页面应该很快会有相应变化.
 
@@ -526,18 +577,17 @@ npm会把包的可执行文件安装到`./node_modules/.bin/`目录下, 所以�
 开发环境编译试过之后, 我们试试看编译生产环境的代码, 命令是:
 
 ```sh
-./node_modules/.bin/webpack-cli --mode production
+./node_modules/.bin/webpack-cli
 ```
+不需要制定配置文件, 默认读取webpack.config.js
 
-`--mode production`参数会开启生产环境模式, 这个模式下webpack会将代码做压缩等优化.
-
-大家可能会发现, 执行脚本的命令有点麻烦. 因此, 我们可以利用npm的特性, 把命令写在`package.json`中:
+执行脚本的命令有点麻烦, 因此, 我们可以利用npm, 把命令写在`package.json`中:
 
 ```json
 {
   "scripts": {
-    "dev": "webpack-dev-server --mode development --hot --env.dev",
-    "build": "webpack-cli --mode production"
+    "dev": "webpack-serve webpack.config.js",
+    "build": "webpack-cli"
   }
 }
 ```
@@ -581,7 +631,7 @@ npm run build
 
 
 ### 指定静态资源的url路径前缀
-现在我们的资源文件的url直接在根目录, 比如`http://127.0.0.1:8100/index.js`, 这样做缓存控制和CDN都不方便, 我们需要给资源文件的url加一个前缀, 比如 `http://127.0.0.1:8100/assets/index.js`这样. 我们来修改一下webpack配置:
+现在我们的资源文件的url直接在根目录, 比如`http://127.0.0.1:8080/index.js`, 这样做缓存控制和CDN都不方便, 我们需要给资源文件的url加一个前缀, 比如 `http://127.0.0.1:8080/assets/index.js`这样. 我们来修改一下webpack配置:
 
 ```js
 {
