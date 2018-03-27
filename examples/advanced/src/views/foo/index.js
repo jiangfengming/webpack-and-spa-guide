@@ -1,23 +1,18 @@
-/* eslint no-console: "off" */
-
+import router from '~/router'
 import template from './index.html'
 import './style.css'
-
 export default class {
   mount(container) {
     document.title = 'foo'
+    container.innerHTML = template
+    container.querySelector('.foo__gobar').addEventListener('click', () => {
+      router.go('/bar.do')
+    })
 
-    console.log(DEBUG)
-    console.log(VERSION)
-    console.log(CONFIG)
-
-    container.innerHTML = `
-      <pre>
-      DEBUG: ${DEBUG}
-      VERSION: ${VERSION}
-      CONFIG: ${JSON.stringify(CONFIG, null, 2)}
-      </pre>
-      ${template}
+    container.querySelector('pre').textContent = `
+DEBUG: ${DEBUG}
+VERSION: ${VERSION}
+CONFIG: ${JSON.stringify(CONFIG)}
     `
   }
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "local": "npm run webpack-serve --config=local",
     "dev": "npm run webpack-serve --config=dev",
-    "webpack-serve": "webpack-serve ./webpack.config.js",
+    "webpack-serve": "webpack-serve webpack.config.js",
     "build": "webpack-cli"
   },
   "author": "",

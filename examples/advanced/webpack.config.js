@@ -12,9 +12,7 @@ const config = require('./config/' + (process.env.npm_config_config || 'default'
 module.exports = {
   mode: dev ? 'development' : 'production',
 
-  entry: {
-    index: './src/index'
-  },
+  entry: './src/index',
 
   optimization: {
     runtimeChunk: true,
@@ -111,14 +109,16 @@ module.exports = {
 
 if (dev) {
   module.exports.serve = {
-    port: 8080,
     host: '0.0.0.0',
+    port: config.serve.port,
     dev: {
       publicPath: config.publicPath
     },
     add: app => {
       app.use(convert(history({
-        index: url.parse(config.publicPath).pathname
+        index: url.parse(config.publicPath).pathname,
+        disableDotRule: true,
+        htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
       })))
     }
   }

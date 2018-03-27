@@ -8,8 +8,6 @@ module.exports = {
     thirdPartyApiKey: 'abcdefg123456'
   },
 
-  publicPath: '/assets/',
-
   serve: {
     port: 8080
   }
