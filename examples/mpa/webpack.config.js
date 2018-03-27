@@ -13,8 +13,38 @@ for (const path of entries) {
   entryHTML.push(new HtmlWebpackPlugin({
     template: path.replace('index.js', 'index.html'),
     filename: chunkName + '.html',
-    chunksSortMode: 'none'
+    chunksSortMode: 'none',
+    chunks: [chunkName]
   }))
+}
+
+class ChunkFilter {
+  apply(compiler) {
+    compiler.plugin('compilation', compilation => {
+      compilation.plugin('html-webpack-plugin-alter-chunks', (data, cb) => {
+        const chunkOnlyConfig = {
+          assets: false,
+          cached: false,
+          children: false,
+          chunks: true,
+          chunkModules: false,
+          chunkOrigins: false,
+          errorDetails: false,
+          hash: false,
+          modules: false,
+          reasons: false,
+          source: false,
+          timings: false,
+          version: false
+        }
+
+        const allChunks = compilation.getStats().toJson(chunkOnlyConfig).chunks
+
+        console.log(allChunks, data)
+        cb(null, data)
+      })
+    })
+  }
 }
 
 const dev = Boolean(process.env.WEBPACK_SERVE)
@@ -93,6 +123,7 @@ module.exports = {
 
   plugins: [
     ...entryHTML,
+    new ChunkFilter(),
 
     new webpack.HashedModuleIdsPlugin(),
 
