@@ -1,4 +1,4 @@
-# Single-Page Application 和 Webpack 4 入门
+# Webpack 4和单页应用入门
 
 > webpack 更新到了4.0, 官网还没有更新文档. 因此把教程更新一下, 方便大家用起webpack 4.
 
