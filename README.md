@@ -136,7 +136,7 @@ webpack是基于我大Node.js的打包工具, 上来第一件事自然是先安�
 │   ├── components            可以复用的模块放在这里面
 │   ├── index.html            入口html
 │   ├── index.js              入口js
-│   ├── libs                  不在npm和git上的库扔这里
+│   ├── shared                公共函数库
 │   └── views                 页面放这里
 └── webpack.config.js         webpack配置文件
 ```
@@ -1036,7 +1036,7 @@ config/*
 遗憾的是`webpack-cli`[不支持](https://github.com/webpack-contrib/webpack-serve#webpack-function-configs).
 
 ### webpack-serve处理带后缀名的文件的特殊规则
-当处理带后缀名的请求时, 比如 http://localhost:8100/bar.do , `connect-history-api-fallback`会认为它应该是一个实际存在的文件, 就算找不到该文件,
+当处理带后缀名的请求时, 比如 http://localhost:8080/bar.do , `connect-history-api-fallback`会认为它应该是一个实际存在的文件, 就算找不到该文件,
 也不会fallback到index.html, 而是返回404. 但在SPA应用中这不是我们希望的.
 幸好有一个配置选项`disableDotRule: true`可以禁用这个规则, 使带后缀的文件当不存在时也能fallback到index.html
 
@@ -1298,8 +1298,8 @@ module.exports = {
 ```
 
 
-## 传统的多页面网站(MPA)能否用webpack打包?
-对于多页面网站, 我们最多的是用Grunt或Gulp来打包, 因为这种简单的页面对模块化编程的需求不高. 但如果你喜欢上使用`import`来引入库, 那么我们仍然可以使用webpack来打包.
+## 使用webpack打包多页面应用(Multiple-Page Application)
+多页面网站同样可以用webpack来打包，以便使用npm包, `import()`, `code splitting`等好处.
 
 MPA意味着并没不是一个单一的html入口和js入口, 而是每个页面对应一个html和多个js. 那么我们可以把项目结构设计为:
 
@@ -1309,68 +1309,66 @@ MPA意味着并没不是一个单一的html入口和js入口, 而是每个页面
 ├── node_modules
 ├── src
 │   ├── components
-│   ├── libs
+│   ├── shared
 |   ├── favicon.png
-|   ├── vendor.js             所有页面公用的第三方库
 │   └── pages                 页面放这里
-|       ├── foo               编译后生成 http://localhost:8100/foo.html
+|       ├── foo               编译后生成 http://localhost:8080/foo.html
 |       |    ├── index.html
 |       |    ├── index.js
 |       |    ├── style.css
 |       |    └── pic.png
-|       └── bar               http://localhost:8100/bar.html
+|       └── bar               http://localhost:8080/bar.html
 |           ├── index.html
 |           ├── index.js
 |           ├── style.css
-|           └── baz           http://localhost:8100/bar/baz.html
+|           └── baz           http://localhost:8080/bar/baz.html
 |               ├── index.html
 |               ├── index.js
 |               └── style.css
 └── webpack.config.js
 ```
 
-这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理. `index.js`是每个页面的业务逻辑, 全部作为入口js配置到`entry`中. 页面公用的第三方库仍然打包进`vendor.js`. 这里我们需要用`glob`库来把这些文件都筛选出来批量操作.
+这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理. `index.js`是每个页面的业务逻辑, 作为每个页面的入口js配置到`entry`中. 这里我们需要用`glob`库来把这些文件都筛选出来批量操作. 为了使用webpack 4的`optimization.splitChunks`和`optimization.runtimeChunk`功能, 我写了[html-webpack-include-sibling-chunks-plugin](https://github.com/fenivana/html-webpack-include-sibling-chunks-plugin)插件来配合使用.
 
 ```sh
-npm install glob --save-dev
+npm install glob html-webpack-include-sibling-chunks-plugin --save-dev
 ```
 
 `webpack.config.js`修改的地方:
 
 ```js
 // ...
+const HtmlWebpackIncludeSiblingChunksPlugin = require('html-webpack-include-sibling-chunks-plugin')
 const glob = require('glob')
 
-module.exports = (options = {}) => {
-  // ...
+const entries = glob.sync('./src/**/index.js')
+const entry = {}
+const htmlPlugins = []
+for (const path of entries) {
+  const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
+  entry[chunkName] = path
+  htmlPlugins.push(new HtmlWebpackPlugin({
+    template: path.replace('index.js', 'index.html'),
+    filename: chunkName + '.html',
+    chunksSortMode: 'none',
+    chunks: [chunkName]
+  }))
+}
 
-  const entries = glob.sync('./src/**/index.js')
-  const entryJsList = {}
-  const entryHtmlList = []
-  for (const path of entries) {
-    const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
-    entryJsList[chunkName] = path
-    entryHtmlList.push(new HtmlWebpackPlugin({
-      template: path.replace('index.js', 'index.html'),
-      filename: chunkName + '.html',
-      chunks: ['manifest', 'vendor', chunkName]
-    }))
-  }
+module.exports = {
+  entry,
 
-  return {
-    entry: Object.assign({
-      vendor: './src/vendor'
-    }, entryJsList),
-
+  plugins: [
+    ...htmlPlugins,
+    new HtmlWebpackIncludeSiblingChunksPlugin(),
     // ...
+  ],
 
-    plugins: [
-      ...entryHtmlList,
-      // ...
-    ]
-  }
+  // ...
 }
 ```
+
+在mpa应用中, 我们不定义`publicPath`, 否则访问html时需要带上`publicPath`前缀.
 
 代码在[examples/mpa](examples/mpa)目录.
 

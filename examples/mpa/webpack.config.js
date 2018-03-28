@@ -1,50 +1,22 @@
 const { resolve } = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackIncludeSiblingChunksPlugin = require('html-webpack-include-sibling-chunks-plugin')
 const pkgInfo = require('./package.json')
 const glob = require('glob')
 
 const entries = glob.sync('./src/**/index.js')
-const entryJS = {}
-const entryHTML = []
+const entry = {}
+const htmlPlugins = []
 for (const path of entries) {
   const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
-  entryJS[chunkName] = path
-  entryHTML.push(new HtmlWebpackPlugin({
+  entry[chunkName] = path
+  htmlPlugins.push(new HtmlWebpackPlugin({
     template: path.replace('index.js', 'index.html'),
     filename: chunkName + '.html',
     chunksSortMode: 'none',
     chunks: [chunkName]
   }))
-}
-
-class ChunkFilter {
-  apply(compiler) {
-    compiler.plugin('compilation', compilation => {
-      compilation.plugin('html-webpack-plugin-alter-chunks', (data, cb) => {
-        const chunkOnlyConfig = {
-          assets: false,
-          cached: false,
-          children: false,
-          chunks: true,
-          chunkModules: false,
-          chunkOrigins: false,
-          errorDetails: false,
-          hash: false,
-          modules: false,
-          reasons: false,
-          source: false,
-          timings: false,
-          version: false
-        }
-
-        const allChunks = compilation.getStats().toJson(chunkOnlyConfig).chunks
-
-        console.log(allChunks, data)
-        cb(null, data)
-      })
-    })
-  }
 }
 
 const dev = Boolean(process.env.WEBPACK_SERVE)
@@ -53,7 +25,7 @@ const config = require('./config/' + (process.env.npm_config_config || 'default'
 module.exports = {
   mode: dev ? 'development' : 'production',
 
-  entry: entryJS,
+  entry,
 
   optimization: {
     runtimeChunk: true,
@@ -122,8 +94,8 @@ module.exports = {
   },
 
   plugins: [
-    ...entryHTML,
-    new ChunkFilter(),
+    ...htmlPlugins,
+    new HtmlWebpackIncludeSiblingChunksPlugin(),
 
     new webpack.HashedModuleIdsPlugin(),
 
