@@ -24,6 +24,7 @@ const config = require('./config/' + (process.env.npm_config_config || 'default'
 
 module.exports = {
   mode: dev ? 'development' : 'production',
+  devtool: dev ? 'cheap-module-eval-source-map' : 'hidden-source-map',
 
   entry,
 
