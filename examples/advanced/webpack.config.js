@@ -83,17 +83,17 @@ module.exports = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({
-      template: 'src/index.html',
-      chunksSortMode: 'none'
-    }),
-
-    new webpack.HashedModuleIdsPlugin(),
-
     new webpack.DefinePlugin({
       DEBUG: dev,
       VERSION: JSON.stringify(pkgInfo.version),
       CONFIG: JSON.stringify(config.runtimeConfig)
+    }),
+
+    new webpack.HashedModuleIdsPlugin(),
+
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      chunksSortMode: 'none'
     })
   ],
 

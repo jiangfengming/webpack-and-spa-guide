@@ -1064,13 +1064,15 @@ const pkgInfo = require('./package.json')
 
 module.exports = {
   // ...
+
   plugins: [
-    // ...
     new webpack.DefinePlugin({
       DEBUG: dev,
       VERSION: JSON.stringify(pkgInfo.version),
       CONFIG: JSON.stringify(config.runtimeConfig)
-    })
+    }),
+
+    // ...
   ]
 }
 ```
@@ -1317,27 +1319,30 @@ MPA意味着并没不是一个单一的html入口和js入口, 而是每个页面
 |       |    ├── index.js
 |       |    ├── style.css
 |       |    └── pic.png
-|       └── bar               http://localhost:8080/bar.html
+|       └── bar                        http://localhost:8080/bar.html
 |           ├── index.html
 |           ├── index.js
 |           ├── style.css
-|           └── baz           http://localhost:8080/bar/baz.html
+|           └── baz                    http://localhost:8080/bar/baz.html
 |               ├── index.html
 |               ├── index.js
 |               └── style.css
 └── webpack.config.js
 ```
 
-这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理. `index.js`是每个页面的业务逻辑, 作为每个页面的入口js配置到`entry`中. 这里我们需要用`glob`库来把这些文件都筛选出来批量操作. 为了使用webpack 4的`optimization.splitChunks`和`optimization.runtimeChunk`功能, 我写了[html-webpack-include-sibling-chunks-plugin](https://github.com/fenivana/html-webpack-include-sibling-chunks-plugin)插件来配合使用.
+这里每个页面的`index.html`是个完整的从`<!DOCTYPE html>`开头到`</html>`结束的页面, 这些文件都要用`html-webpack-plugin`处理. `index.js`是每个页面的业务逻辑, 作为每个页面的入口js配置到`entry`中. 这里我们需要用`glob`库来把这些文件都筛选出来批量操作. 为了使用webpack 4的`optimization.splitChunks`和`optimization.runtimeChunk`功能, 我写了[html-webpack-include-sibling-chunks-plugin](https://github.com/fenivana/html-webpack-include-sibling-chunks-plugin)插件来配合使用. 还要装几个插件把css压缩并放到`<head>`中.
 
 ```sh
-npm install glob html-webpack-include-sibling-chunks-plugin --save-dev
+npm install glob html-webpack-include-sibling-chunks-plugin uglifyjs-webpack-plugin mini-css-extract-plugin optimize-css-assets-webpack-plugin --save-dev
 ```
 
 `webpack.config.js`修改的地方:
 
 ```js
 // ...
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const HtmlWebpackIncludeSiblingChunksPlugin = require('html-webpack-include-sibling-chunks-plugin')
 const glob = require('glob')
 
@@ -1358,14 +1363,75 @@ for (const path of entries) {
 module.exports = {
   entry,
 
+  output: {
+    path: resolve(__dirname, 'dist'),
+    // 这里生产环境filename不使用[name]而用[id], 避免产生冗余文件夹
+    filename: dev ? '[name].js' : '[id].[chunkhash].js',
+    chunkFilename: '[chunkhash].js'
+  },
+
+  optimization: {
+    runtimeChunk: true,
+    splitChunks: {
+      chunks: 'all'
+    },
+    minimizer: dev ? [] : [
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true
+      }),
+      new OptimizeCSSAssetsPlugin()
+    ]
+  },
+
   plugins: [
-    ...htmlPlugins,
-    new HtmlWebpackIncludeSiblingChunksPlugin(),
     // ...
+    // 必须放在html-webpack-plugin前面
+    new HtmlWebpackIncludeSiblingChunksPlugin(),
+
+    ...htmlPlugins
   ],
 
   // ...
 }
+```
+
+`entry`和`htmlPlugins`会通过遍历pages目录生成, 比如:
+
+entry:
+```js
+{
+  'bar/baz': './src/pages/bar/baz/index.js',
+  bar: './src/pages/bar/index.js',
+  foo: './src/pages/foo/index.js'
+}
+```
+
+htmlPlugins:
+```js
+[
+  new HtmlWebpackPlugin({
+    template: './src/pages/bar/baz/index.html',
+    filename: 'bar/baz.html',
+    chunksSortMode: 'none',
+    chunks: ['bar/baz']
+  },
+
+  new HtmlWebpackPlugin({
+    template: './src/pages/bar/index.html',
+    filename: 'bar.html',
+    chunksSortMode: 'none',
+    chunks: ['bar']
+  },
+
+  new HtmlWebpackPlugin({
+    template: './src/pages/foo/index.html',
+    filename: 'foo.html',
+    chunksSortMode: 'none',
+    chunks: ['foo']
+  }
+]
 ```
 
 在mpa应用中, 我们不定义`publicPath`, 否则访问html时需要带上`publicPath`前缀.
