@@ -1365,6 +1365,7 @@ module.exports = {
 
   output: {
     path: resolve(__dirname, 'dist'),
+    // 我们不定义publicPath, 否则访问html时需要带上publicPath前缀
     // 这里生产环境filename不使用[name]而用[id], 避免产生冗余文件夹
     filename: dev ? '[name].js' : '[id].[chunkhash].js',
     chunkFilename: '[chunkhash].js'
@@ -1433,8 +1434,6 @@ htmlPlugins:
   }
 ]
 ```
-
-在mpa应用中, 我们不定义`publicPath`, 否则访问html时需要带上`publicPath`前缀.
 
 代码在[examples/mpa](examples/mpa)目录.
 
