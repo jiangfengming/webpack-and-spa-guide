@@ -5,6 +5,7 @@ const pkgInfo = require('./package.json')
 const history = require('connect-history-api-fallback')
 const convert = require('koa-connect')
 const url = require('url')
+const internalIp = require('internal-ip')
 
 const dev = Boolean(process.env.WEBPACK_SERVE)
 const config = require('./config/' + (process.env.npm_config_config || 'default'))
@@ -111,6 +112,12 @@ module.exports = {
 if (dev) {
   module.exports.serve = {
     host: '0.0.0.0',
+    hot: {
+      host: {
+        client: internalIp.v4.sync(),
+        server: '0.0.0.0'
+      }
+    },
     port: config.serve.port,
     dev: {
       publicPath: config.publicPath

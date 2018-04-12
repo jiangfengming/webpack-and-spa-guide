@@ -335,9 +335,9 @@ export default class {
 npm install webpack webpack-cli webpack-serve html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
 [webpack](https://github.com/webpack/webpack)即webpack核心库. 它提供了很多[API](https://webpack.js.org/api/node/), 通过Node.js脚本中`require('webpack')`的方式来使用webpack.
-[webpack-cli](https://github.com/webpack/webpack-cli)是webpack的命令行工具. 让我们可以不用写打包脚本, 只需配置打包配置文件, 然后在命令行输入`webpack-cli --config webpack.config.js`来使用webpack, 简单很多. webpack 4之前命令行工具是集成在webpack包中的, 4.0开始webpack包本身不再集成cli.  
-[webpack-serve](https://github.com/webpack-contrib/webpack-serve)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.  
-[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.  
+[webpack-cli](https://github.com/webpack/webpack-cli)是webpack的命令行工具. 让我们可以不用写打包脚本, 只需配置打包配置文件, 然后在命令行输入`webpack-cli --config webpack.config.js`来使用webpack, 简单很多. webpack 4之前命令行工具是集成在webpack包中的, 4.0开始webpack包本身不再集成cli.
+[webpack-serve](https://github.com/webpack-contrib/webpack-serve)是webpack提供的用来开发调试的服务器, 让你可以用 http://127.0.0.1:8080/ 这样的url打开页面来调试, 有了它就不用配置[nginx](https://nginx.org/en/)了, 方便很多.
+[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包html文件, css文件的插件, 大家在这里可能会有疑问, `html-webpack-plugin`和`html-loader`有什么区别, `css-loader`和`style-loader`有什么区别, 我们等会看配置文件的时候再讲.
 [file-loader](https://github.com/webpack/file-loader)和[url-loader](https://github.com/webpack/url-loader)是打包二进制文件的插件, 具体也在配置文件章节讲解.
 
 接下来, 为了能让不支持ES6的浏览器(比如IE)也能照常运行, 我们需要安装[babel](http://babeljs.io/), 它会把我们写的ES6源代码转化成ES5, 这样我们源代码写ES6, 打包时生成ES5.
@@ -346,7 +346,7 @@ npm install webpack webpack-cli webpack-serve html-webpack-plugin html-loader cs
 npm install babel-core babel-preset-env babel-loader --save-dev
 ```
 
-这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件, 我们可以使用这个配置文件转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/).  
+这里`babel-core`顾名思义是babel的核心编译器. [babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件, 我们可以使用这个配置文件转换[ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html)到ES5, 是的, 不只ES6哦. babel还有[其他配置文件](http://babeljs.io/docs/plugins/).
 
 光安装了`babel-preset-env`, 在打包时是不会生效的, 需要在`package.json`加入`babel`配置:
 
@@ -358,7 +358,7 @@ npm install babel-core babel-preset-env babel-loader --save-dev
 }
 ```
 
-打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.  
+打包时babel会读取`package.json`中`babel`字段的内容, 然后执行相应的转换.
 
 [babel-loader](https://github.com/babel/babel-loader)是webpack的插件, 我们下面章节再说.
 
@@ -932,8 +932,16 @@ webpack配置中加入:
 ### 开发环境允许其他电脑访问
 
 ```js
+const internalIp = require('internal-ip')
+
 module.exports.serve = {
-  host: '0.0.0.0'
+  host: '0.0.0.0',
+  hot: {
+    host: {
+      client: internalIp.v4.sync(),
+      server: '0.0.0.0'
+    }
+  },
   // ...
 }
 ```

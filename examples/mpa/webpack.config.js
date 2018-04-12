@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackIncludeSiblingChunksPlugin = require('html-webpack-include-sibling-chunks-plugin')
+const internalIp = require('internal-ip')
 const pkgInfo = require('./package.json')
 const glob = require('glob')
 
@@ -138,6 +139,12 @@ module.exports = {
 if (dev) {
   module.exports.serve = {
     host: '0.0.0.0',
+    hot: {
+      host: {
+        client: internalIp.v4.sync(),
+        server: '0.0.0.0'
+      }
+    },
     port: config.serve.port
   }
 }
