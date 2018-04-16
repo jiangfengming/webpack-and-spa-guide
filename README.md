@@ -758,8 +758,8 @@ npm install babel-preset-stage-2 --save-dev
   output: {
     /*
     entry 字段配置的入口 js 的打包输出文件名
-    [name]作为占位符，在输出时会被替换为 entry 里定义的属性名，比如这里会被替换为 "index"
-    [chunkhash]是打包后输出文件的 hash 值的占位符，把 [chunkhash] 加入文件名可以防止浏览器使用缓存的过期内容，
+    [name] 作为占位符，在输出时会被替换为 entry 里定义的属性名，比如这里会被替换为 "index"
+    [chunkhash] 是打包后输出文件的 hash 值的占位符，把 [chunkhash] 加入文件名可以防止浏览器使用缓存的过期内容，
     这里，webpack 会生成以下代码插入到 index.html 中：
     <script type="text/javascript" src="/assets/index.d835352892e6aac768bf.js"></script>
     这里 / assets / 目录前缀是 output.publicPath 配置的
@@ -772,7 +772,7 @@ npm install babel-preset-stage-2 --save-dev
 }
 ```
 
-有人可能注意到官网文档中还有一个 [hash] 占位符，这个 hash 是整个编译过程产生的一个总的 hash 值，而不是单个文件的 hash 值，项目中任何一个文件的改动，都会造成这个 hash 值的改变。[hash]占位符是始终存在的，但我们不希望修改一个文件导致所有输出的文件 hash 都改变，这样就无法利用浏览器缓存了。因此这个 [hash] 意义不大。
+有人可能注意到官网文档中还有一个 [hash] 占位符，这个 hash 是整个编译过程产生的一个总的 hash 值，而不是单个文件的 hash 值，项目中任何一个文件的改动，都会造成这个 hash 值的改变。[hash] 占位符是始终存在的，但我们不希望修改一个文件导致所有输出的文件 hash 都改变，这样就无法利用浏览器缓存了。因此这个 [hash] 意义不大。
 
 
 ### 第三方库和业务代码分开打包
@@ -896,7 +896,7 @@ webpack 配置中加入：
             options: {
               /*
               name: 指定文件输出名
-              [name]是源文件名，不包含后缀。[ext]为后缀。[hash]为源文件的 hash 值，
+              [name] 是源文件名，不包含后缀。[ext] 为后缀。[hash] 为源文件的 hash 值，
               我们加上 [hash] 防止浏览器读取过期的缓存文件。
               */
               name: '[name].[hash].[ext]'
