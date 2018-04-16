@@ -34,7 +34,7 @@
 * 库和插件为了要给他人调用，肯定要找个地方注册，一般就是在 window 下申明一个全局的函数或对象。难保哪天用的两个库在全局用同样的名字，那就冲突了。
 * 库和插件如果还依赖其他的库和插件，就要告知使用人，需要先引哪些依赖库，那些依赖库也有自己的依赖库的话，就要先引依赖库的依赖库，以此类推。
 
-恰好就在这个时候 (2009 年）, 随着后端 JavaScript 技术的发展，人们提出了 [CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1.1) 的模块化规范，大概的语法是： 如果 `a.js` 依赖 `b.js` 和 `c.js`, 那么就在 `a.js` 的头部，引入这些依赖文件：
+恰好就在这个时候 (2009 年）， 随着后端 JavaScript 技术的发展，人们提出了 [CommonJS](http://wiki.commonjs.org/wiki/Modules/1.1.1) 的模块化规范，大概的语法是： 如果 `a.js` 依赖 `b.js` 和 `c.js`， 那么就在 `a.js` 的头部，引入这些依赖文件：
 
 ```js
 var b = require('./b')
@@ -55,14 +55,14 @@ exports.square = function(num) {
 var n = b.square(2)
 ```
 
-如果 `c.js` 依赖 `d.js`, 导出的是一个 `Number`, 那么可以这样写：
+如果 `c.js` 依赖 `d.js`， 导出的是一个 `Number`， 那么可以这样写：
 
 ```js
 var d = require('./d')
 module.exports = d.PI // 假设 d.PI 的值是 3.14159
 ```
 
-那么 `a.js` 中的变量 `c` 就是数字 `3.14159`, 具体的语法规范可以查看 Node.js 的 [文档](https://nodejs.org/api/modules.html)。
+那么 `a.js` 中的变量 `c` 就是数字 `3.14159`， 具体的语法规范可以查看 Node.js 的 [文档](https://nodejs.org/api/modules.html)。
 
 
 但是 CommonJS 在浏览器内并不适用。因为 `require()` 的返回是同步的，意味着有多个依赖的话需要一个一个依次下载，堵塞了 js 脚本的执行。所以人们就在 CommonJS 的基础上定义了 [Asynchronous Module Definition (AMD)](https://github.com/amdjs/amdjs-api) 规范(2011 年）, 使用了异步回调的语法来并行下载多个依赖项，比如作为入口的 `a.js` 可以这样写：
@@ -74,7 +74,7 @@ require(['./b', './c'], function(b, c) {
 })
 ```
 
-相应的导出语法也是异步回调方式，比如 `c.js` 依赖 `d.js`, 就写成这样：
+相应的导出语法也是异步回调方式，比如 `c.js` 依赖 `d.js`， 就写成这样：
 
 ```js
 define(['./d'], function(d) {
@@ -101,7 +101,7 @@ js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](ht
 布局会把 header， nav， footer 的内容填上，但 main 区域是个空的容器。这个作为入口的 html 最主要的工作是加载启动 SPA 的 js 文件，然后由 js 驱动，根据当前浏览器地址进行路由分发，加载对应的 AMD 模块，然后该 AMD 模块执行，渲染对应的 html 到页面指定的容器内（比如图中的 main)。 在点击链接等交互时，页面不会跳转，而是由 js 路由加载对应的 AMD 模块，然后该 AMD 模块渲染对应的 html 到容器内。
 
 虽然 AMD 模块让 SPA 更容易地实现，但小问题还是很多的：
-* 不是所有的第三方库都是 AMD 规范的，这时候要配置 `shim`, 很麻烦。
+* 不是所有的第三方库都是 AMD 规范的，这时候要配置 `shim`， 很麻烦。
 * 虽然 RequireJS 支持通过插件把 html 作为依赖加载，但 html 里面的 `<img>` 的路径是个问题，需要使用绝对路径并且保持打包后的图片路径和打包前的路径不变，或者使用 html 模板语言把 `src` 写成变量，在运行时生成。
 * 不支持动态加载 css, 变通的方法是把所有的 css 文件合并压缩成一个文件，在入口的 html 页面一次性加载。
 * SPA 项目越做越大，一个应用打包后的 js 文件到了几 MB 的大小。虽然 `r.js` 支持分模块打包，但配置很麻烦，因为模块之间会互相依赖，在配置的时候需要 exclude 那些通用的依赖项，而依赖项要在文件里一个个检查。
@@ -126,7 +126,7 @@ js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](ht
 webpack 是基于我大 Node.js 的打包工具，上来第一件事自然是先安装 Node.js 了，[传送门 ->](https://nodejs.org/)。
 
 ### 初始化一个项目
-我们先随便找个地方，建一个文件夹叫 `simple`, 然后在这里面搭项目。完成品在 [examples/simple](examples/simple) 目录，大家搞的时候可以参照一下。我们先看一下目录结构：
+我们先随便找个地方，建一个文件夹叫 `simple`， 然后在这里面搭项目。完成品在 [examples/simple](examples/simple) 目录，大家搞的时候可以参照一下。我们先看一下目录结构：
 
 ```
 ├── dist                      打包输出目录，只需部署这个目录到生产环境
@@ -150,7 +150,7 @@ npm init
 命令行会要你输入一些配置信息，我们这里一路按回车下去，生成一个默认的项目配置文件 `package.json`。
 
 ### 给项目加上语法报错和代码规范检查
-我们安装 [eslint](http://eslint.org/), 用来检查语法报错，当我们书写 js 时，有错误的地方会出现提示。
+我们安装 [eslint](http://eslint.org/)， 用来检查语法报错，当我们书写 js 时，有错误的地方会出现提示。
 
 ```sh
 npm install eslint eslint-config-enough eslint-loader --save-dev
@@ -158,7 +158,7 @@ npm install eslint eslint-config-enough eslint-loader --save-dev
 
 `npm install` 可以一条命令同时安装多个包，包之间用空格分隔。包会被安装进 `node_modules` 目录中。
 
-`--save-dev` 会把安装的包和版本号记录到 `package.json` 中的 `devDependencies` 对象中，还有一个 `--save`, 会记录到 `dependencies` 对象中，它们的区别，我们可以先简单的理解为打包工具和测试工具用到的包使用 `--save-dev` 存到 `devDependencies`, 比如 eslint, webpack. 浏览器中执行的 js 用到的包存到 `dependencies`, 比如 jQuery 等。那么它们用来干嘛的?
+`--save-dev` 会把安装的包和版本号记录到 `package.json` 中的 `devDependencies` 对象中，还有一个 `--save`， 会记录到 `dependencies` 对象中，它们的区别，我们可以先简单的理解为打包工具和测试工具用到的包使用 `--save-dev` 存到 `devDependencies`， 比如 eslint, webpack. 浏览器中执行的 js 用到的包存到 `dependencies`， 比如 jQuery 等。那么它们用来干嘛的?
 
 因为有些 npm 包安装是需要编译的，那么导致 windows/mac/linux 上编译出的可执行文件是不同的，也就是无法通用，因此我们在提交代码到 git 上去的时候，一般都会在 `.gitignore` 里指定忽略 node_modules 目录和里面的文件，这样其他人从 git 上拉下来的项目是没有 node_modules 目录的，这时我们需要运行
 
@@ -212,7 +212,7 @@ npm install
 </html>
 ```
 
-它是一个空白页面，注意这里我们不需要自己写 `<script src="index.js"></script>`, 因为打包后的文件名和路径可能会变，所以我们用 webpack 插件帮我们自动加上。
+它是一个空白页面，注意这里我们不需要自己写 `<script src="index.js"></script>`， 因为打包后的文件名和路径可能会变，所以我们用 webpack 插件帮我们自动加上。
 
 src/index.js:
 
@@ -348,7 +348,7 @@ npm install babel-core babel-preset-env babel-loader --save-dev
 
 这里 `babel-core` 顾名思义是 babel 的核心编译器。[babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件，我们可以使用这个配置文件转换 [ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html) 到 ES5, 是的，不只 ES6 哦。babel 还有 [其他配置文件](http://babeljs.io/docs/plugins/)。
 
-光安装了 `babel-preset-env`, 在打包时是不会生效的，需要在 `package.json` 加入 `babel` 配置：
+光安装了 `babel-preset-env`， 在打包时是不会生效的，需要在 `package.json` 加入 `babel` 配置：
 
 ```json
 {
@@ -364,7 +364,7 @@ npm install babel-core babel-preset-env babel-loader --save-dev
 
 
 ### 配置 webpack
-包都装好了，接下来总算可以进入正题了。我们来创建 webpack 配置文件 `webpack.config.js`, 注意这个文件是在 node.js 中运行的，因此不支持 ES6 的 `import` 语法。我们来看文件内容：
+包都装好了，接下来总算可以进入正题了。我们来创建 webpack 配置文件 `webpack.config.js`， 注意这个文件是在 node.js 中运行的，因此不支持 ES6 的 `import` 语法。我们来看文件内容：
 
 ```js
 const { resolve } = require('path')
@@ -598,7 +598,7 @@ npm 会把包的可执行文件安装到 `./node_modules/.bin/` 目录下，所�
 }
 ```
 
-`package.json` 中的 `scripts` 对象，可以用来写一些脚本命令，命令不需要前缀目录 `./node_modules/.bin/`, npm 会自动寻找该目录下的命令。我们可以执行：
+`package.json` 中的 `scripts` 对象，可以用来写一些脚本命令，命令不需要前缀目录 `./node_modules/.bin/`， npm 会自动寻找该目录下的命令。我们可以执行：
 
 ```sh
 npm run dev
@@ -636,7 +636,7 @@ npm run build
 
 
 ### 设置静态资源的 url 路径前缀
-现在我们的资源文件的 url 直接在根目录，比如 `http://127.0.0.1:8080/index.js`, 这样做缓存控制和 CDN 不是很方便，因此我们给资源文件的 url 加一个前缀，比如 `http://127.0.0.1:8080/assets/index.js`. 我们来修改一下 webpack 配置：
+现在我们的资源文件的 url 直接在根目录，比如 `http://127.0.0.1:8080/index.js`， 这样做缓存控制和 CDN 不是很方便，因此我们给资源文件的 url 加一个前缀，比如 `http://127.0.0.1:8080/assets/index.js`. 我们来修改一下 webpack 配置：
 
 ```js
 {
@@ -952,7 +952,7 @@ module.exports.serve = {
 
 还有一点就是开发环境 / 测试环境 / 生产环境的部分 webpack 配置是不同的，比如 `publicPath` 在生产环境可能要配置一个 CDN 地址。
 
-我们在根目录建立一个文件夹 `config`, 里面创建 3 个配置文件：
+我们在根目录建立一个文件夹 `config`， 里面创建 3 个配置文件：
 * `default.js`: 生产环境
 
 ```js
@@ -1103,7 +1103,7 @@ console.log(DEBUG)
 console.log(true)
 ```
 
-这里有一点需要注意，像这里的 `VERSION`, 如果我们不对 `pkgInfo.version` 做 `JSON.stringify()`,
+这里有一点需要注意，像这里的 `VERSION`， 如果我们不对 `pkgInfo.version` 做 `JSON.stringify()`，
 
 ```js
 console.log(VERSION)
@@ -1121,7 +1121,7 @@ console.log(VERSION)
 console.log(1.0.0)
 ```
 
-这样语法就错误了。所以，我们需要 `JSON.stringify(pkgInfo.version)` 转一下变成 `'"1.0.0"'`, 替换的时候才会带引号。
+这样语法就错误了。所以，我们需要 `JSON.stringify(pkgInfo.version)` 转一下变成 `'"1.0.0"'`， 替换的时候才会带引号。
 
 还有一点，webpack 打包压缩的时候，会把代码进行优化，比如：
 
@@ -1229,7 +1229,7 @@ package.json:
 
 
 ### 使用 webpack 自带的 ES6 模块处理功能
-我们目前的配置，babel 会把 ES6 模块定义转为 CommonJS 定义，但 webpack 自己可以处理 `import` 和 `export`, 而且 webpack 处理 `import` 时会做代码优化，把没用到的部分代码删除掉。因此我们通过 babel 提供的 `modules: false` 选项把 ES6 模块转为 CommonJS 模块的功能给关闭掉。
+我们目前的配置，babel 会把 ES6 模块定义转为 CommonJS 定义，但 webpack 自己可以处理 `import` 和 `export`， 而且 webpack 处理 `import` 时会做代码优化，把没用到的部分代码删除掉。因此我们通过 babel 提供的 `modules: false` 选项把 ES6 模块转为 CommonJS 模块的功能给关闭掉。
 
 package.json:
 
@@ -1309,7 +1309,7 @@ module.exports = {
 
 
 ## 使用 webpack 打包多页面应用(Multiple-Page Application)
-多页面网站同样可以用 webpack 来打包，以便使用 npm 包，`import()`, `code splitting` 等好处。
+多页面网站同样可以用 webpack 来打包，以便使用 npm 包，`import()`， `code splitting` 等好处。
 
 MPA 意味着并没不是一个单一的 html 入口和 js 入口，而是每个页面对应一个 html 和多个 js. 那么我们可以把项目结构设计为：
 
