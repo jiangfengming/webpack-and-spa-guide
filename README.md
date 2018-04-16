@@ -94,7 +94,7 @@ js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](ht
 
 托 AMD 和 CSS 预处理和模板语言的福，我们的编译脚本也洋洋洒洒写了百来行。命令行脚本有个不好的地方，就是 windows 和 mac/linux 是不通用的，如果有跨平台需求的话，windows 要装个可以执行 bash 脚本的命令行工具，比如 msys（目前最新的是 [msys2](http://msys2.github.io/)), 或者使用 php 或 python 等其他语言的脚本来编写，对于非全栈型的前端程序员来说，写 bash/php/python 还是很生涩的。因此我们需要一个简单的打包工具，可以利用各种编译工具，编译 / 压缩 js, css, html, 图片等资源。然后 [Grunt](http://gruntjs.com/) 产生了 (2012 年）, 配置文件格式是我们最爱的 js, 写法也很简单，社区有非常多的插件支持各种编译，lint, 测试工具。一年多后另一个打包工具 [gulp](http://gulpjs.com/) 诞生了，扩展性更强，采用流式处理效率更高。
 
-依托 AMD 模块化编程，SPA(Single-page application)的实现方式更为简单清晰，一个网页不再是传统的类似 word 文档的页面，而是一个完整的应用程序。SPA 应用有一个总的入口页面，我们通常把它命名为 `index.html`， `app.html`， `main.html`， 这个 html 的 `<body>` 一般是空的，或者只有总的布局（layout）， 比如下图：
+依托 AMD 模块化编程，SPA(Single-page application) 的实现方式更为简单清晰，一个网页不再是传统的类似 word 文档的页面，而是一个完整的应用程序。SPA 应用有一个总的入口页面，我们通常把它命名为 `index.html`， `app.html`， `main.html`， 这个 html 的 `<body>` 一般是空的，或者只有总的布局（layout）， 比如下图：
 
 ![layout](assets/layout.png)
 
@@ -184,15 +184,15 @@ npm install
 
 业界最有名的语法规范是 [airbnb](https://github.com/airbnb/javascript) 出品的，但它规定的太死板了，比如不允许使用 `for-of` 和 `for-in` 等。感兴趣的同学可以参照 [这里](https://www.npmjs.com/package/eslint-config-airbnb) 安装使用。
 
-[eslint-loader](https://github.com/MoOx/eslint-loader)用于在 webpack 编译的时候检查代码，如果有错误，webpack 会报错。
+[eslint-loader](https://github.com/MoOx/eslint-loader) 用于在 webpack 编译的时候检查代码，如果有错误，webpack 会报错。
 
 项目里安装了 eslint 还没用，我们的 IDE 和编辑器也得要装 eslint 插件支持它。
 
-[Visual Studio Code](https://code.visualstudio.com/)需要安装 [ESLint 扩展](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+[Visual Studio Code](https://code.visualstudio.com/) 需要安装 [ESLint 扩展](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 
-[atom](https://atom.io/)需要安装 [linter](https://atom.io/packages/linter) 和 [linter-eslint](https://atom.io/packages/linter-eslint) 这两个插件，装好后重启生效。
+[atom](https://atom.io/) 需要安装 [linter](https://atom.io/packages/linter) 和 [linter-eslint](https://atom.io/packages/linter-eslint) 这两个插件，装好后重启生效。
 
-[WebStorm](https://www.jetbrains.com/webstorm/)需要在设置中打开 eslint 开关：
+[WebStorm](https://www.jetbrains.com/webstorm/) 需要在设置中打开 eslint 开关：
 
 ![WebStorm ESLint Config](assets/webstorm-eslint-config.png)
 
@@ -334,11 +334,11 @@ export default class {
 ```sh
 npm install webpack webpack-cli webpack-serve html-webpack-plugin html-loader css-loader style-loader file-loader url-loader --save-dev
 ```
-[webpack](https://github.com/webpack/webpack)即 webpack 核心库。它提供了很多 [API](https://webpack.js.org/api/node/), 通过 Node.js 脚本中 `require('webpack')` 的方式来使用 webpack。
-[webpack-cli](https://github.com/webpack/webpack-cli)是 webpack 的命令行工具。让我们可以不用写打包脚本，只需配置打包配置文件，然后在命令行输入 `webpack-cli --config webpack.config.js` 来使用 webpack, 简单很多。webpack 4 之前命令行工具是集成在 webpack 包中的，4.0 开始 webpack 包本身不再集成 cli。
-[webpack-serve](https://github.com/webpack-contrib/webpack-serve)是 webpack 提供的用来开发调试的服务器，让你可以用 http://127.0.0.1:8080/ 这样的 url 打开页面来调试，有了它就不用配置 [nginx](https://nginx.org/en/) 了，方便很多。
-[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader)等看名字就知道是打包 html 文件，css 文件的插件，大家在这里可能会有疑问，`html-webpack-plugin` 和 `html-loader` 有什么区别，`css-loader` 和 `style-loader` 有什么区别，我们等会看配置文件的时候再讲。
-[file-loader](https://github.com/webpack/file-loader)和 [url-loader](https://github.com/webpack/url-loader) 是打包二进制文件的插件，具体也在配置文件章节讲解。
+[webpack](https://github.com/webpack/webpack) 即 webpack 核心库。它提供了很多 [API](https://webpack.js.org/api/node/), 通过 Node.js 脚本中 `require('webpack')` 的方式来使用 webpack。
+[webpack-cli](https://github.com/webpack/webpack-cli) 是 webpack 的命令行工具。让我们可以不用写打包脚本，只需配置打包配置文件，然后在命令行输入 `webpack-cli --config webpack.config.js` 来使用 webpack, 简单很多。webpack 4 之前命令行工具是集成在 webpack 包中的，4.0 开始 webpack 包本身不再集成 cli。
+[webpack-serve](https://github.com/webpack-contrib/webpack-serve) 是 webpack 提供的用来开发调试的服务器，让你可以用 http://127.0.0.1:8080/ 这样的 url 打开页面来调试，有了它就不用配置 [nginx](https://nginx.org/en/) 了，方便很多。
+[html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin), [html-loader](https://github.com/webpack/html-loader), [css-loader](https://github.com/webpack/css-loader), [style-loader](https://github.com/webpack/style-loader) 等看名字就知道是打包 html 文件，css 文件的插件，大家在这里可能会有疑问，`html-webpack-plugin` 和 `html-loader` 有什么区别，`css-loader` 和 `style-loader` 有什么区别，我们等会看配置文件的时候再讲。
+[file-loader](https://github.com/webpack/file-loader) 和 [url-loader](https://github.com/webpack/url-loader) 是打包二进制文件的插件，具体也在配置文件章节讲解。
 
 接下来，为了能让不支持 ES6 的浏览器 （比如 IE) 也能照常运行，我们需要安装 [babel](http://babeljs.io/), 它会把我们写的 ES6 源代码转化成 ES5, 这样我们源代码写 ES6, 打包时生成 ES5。
 
@@ -346,7 +346,7 @@ npm install webpack webpack-cli webpack-serve html-webpack-plugin html-loader cs
 npm install babel-core babel-preset-env babel-loader --save-dev
 ```
 
-这里 `babel-core` 顾名思义是 babel 的核心编译器。[babel-preset-env](https://babeljs.io/docs/plugins/preset-env/)是一个配置文件，我们可以使用这个配置文件转换 [ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html) 到 ES5, 是的，不只 ES6 哦。babel 还有 [其他配置文件](http://babeljs.io/docs/plugins/)。
+这里 `babel-core` 顾名思义是 babel 的核心编译器。[babel-preset-env](https://babeljs.io/docs/plugins/preset-env/) 是一个配置文件，我们可以使用这个配置文件转换 [ES2015](http://exploringjs.com/es6/)/[ES2016](https://leanpub.com/exploring-es2016-es2017/read)/[ES2017](http://www.2ality.com/2016/02/ecmascript-2017.html) 到 ES5, 是的，不只 ES6 哦。babel 还有 [其他配置文件](http://babeljs.io/docs/plugins/)。
 
 光安装了 `babel-preset-env`， 在打包时是不会生效的，需要在 `package.json` 加入 `babel` 配置：
 
@@ -360,7 +360,7 @@ npm install babel-core babel-preset-env babel-loader --save-dev
 
 打包时 babel 会读取 `package.json` 中 `babel` 字段的内容，然后执行相应的转换。
 
-[babel-loader](https://github.com/babel/babel-loader)是 webpack 的插件，我们下面章节再说。
+[babel-loader](https://github.com/babel/babel-loader) 是 webpack 的插件，我们下面章节再说。
 
 
 ### 配置 webpack
@@ -674,7 +674,7 @@ if (dev) {
 这样浏览器只需加载当前页面所需的代码。
 
 webpack 可以使用异步加载文件的方式引用模块，我们使用 [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)/
-[await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)和 [dynamic import](https://github.com/tc39/proposal-dynamic-import) 来实现：
+[await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) 和 [dynamic import](https://github.com/tc39/proposal-dynamic-import) 来实现：
 
 `src/router.js`:
 
@@ -683,7 +683,7 @@ webpack 可以使用异步加载文件的方式引用模块，我们使用 [asyn
 import 'regenerator-runtime/runtime'
 
 const routes = {
-  // import()返回 promise
+  // import() 返回 promise
   '/foo': () => import('./views/foo'),
   '/bar.do': () => import('./views/bar.do')
 }
@@ -736,7 +736,7 @@ npm install babel-preset-stage-2 --save-dev
 {
   output: {
     /*
-    import()加载的文件会被分开打包，我们称这个包为 chunk, chunkFilename 用来配置这个 chunk 输出的文件名。
+    import() 加载的文件会被分开打包，我们称这个包为 chunk, chunkFilename 用来配置这个 chunk 输出的文件名。
 
     [chunkhash]: 这个 chunk 的 hash 值，文件发生变化时该值也会变。使用 [chunkhash] 作为文件名可以防止浏览器读取旧的缓存文件。
 
