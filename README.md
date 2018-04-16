@@ -16,7 +16,7 @@
 ~~是的，即使是外国佬也在吐槽这文档不是人能看的。回想起当年自己啃 webpack 文档的血与泪的往事，觉得有必要整一个教程，可以让大家看完后愉悦地搭建起一个 webpack 打包方案的项目。~~
 
 
-官网新的 [webpack](https://webpack.js.org/) 文档现在写的很详细了，能看英文的小伙伴可以直接去看官网。～
+官网新的 [webpack](https://webpack.js.org/) 文档现在写的很详细了，能看英文的小伙伴可以直接去看官网。
 
 
 可能会有人问 webpack 到底有什么用，你不能上来就糊我一脸代码让我马上搞，我照着搞了一遍结果根本没什么 naizi 用，都是骗人的。所以，在说 webpack 之前，我想先谈一下前端打包方案这几年的演进历程，在什么场景下，我们遇到了什么问题，催生出了应对这些问题的工具。了解了需求和目的之后，你就知道什么时候 webpack 可以帮到你。我希望我用完之后很爽，你们用完之后也是。
@@ -26,9 +26,9 @@
 
 随后的几年，人们开始尝试在一个页面里做更多的事情。容器的显示，隐藏，切换。用 css 写的弹层，图片轮播等等。但如果一个页面内不能向服务器请求数据，能做的事情毕竟有限的，代码的量也能维持在页面交互逻辑范围内。这时候很多人开始突破一个页面能做的事情的范围，使用隐藏的 iframe 和 flash 等作为和服务器通信的桥梁，新世界的大门慢慢地被打开，在一个页面内和服务器进行数据交互，意味着以前需要跳转多个页面的事情现在可以用一个页面搞定。但由于 iframe 和 flash 技术过于 tricky 和复杂，并没能得到广泛的推广。
 
-直到 Google 推出 Gmail 的时候（2004 年）, 人们意识到了一个被忽略的接口，[XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), 也就是我们俗称的 AJAX, 这是一个使用方便的，兼容性良好的服务器通信接口。从此开始，我们的页面开始玩出各种花来了，前端一下子出现了各种各样的库，[Prototype](http://prototypejs.org/), [Dojo](https://dojotoolkit.org/), [MooTools](http://mootools.net/), [Ext JS](https://www.sencha.com/products/extjs/), [jQuery](https://jquery.com/)... 我们开始往页面里插入各种库和插件，我们的 js 文件也就爆炸了。
+直到 Google 推出 Gmail 的时候（2004 年）, 人们意识到了一个被忽略的接口，[XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), 也就是我们俗称的 AJAX, 这是一个使用方便的，兼容性良好的服务器通信接口。从此开始，我们的页面开始玩出各种花来了，前端一下子出现了各种各样的库，[Prototype](http://prototypejs.org/)， [Dojo](https://dojotoolkit.org/)， [MooTools](http://mootools.net/)， [Ext JS](https://www.sencha.com/products/extjs/)， [jQuery](https://jquery.com/)... 我们开始往页面里插入各种库和插件，我们的 js 文件也就爆炸了。
 
-随着 js 能做的事情越来越多，引用越来越多，文件越来越大，加上当时大约只有 2Mbps 左右的网速，下载速度还不如 3G 网络，对 js 文件的压缩和合并的需求越来越强烈，当然这里面也有把代码混淆了不容易被盗用等其他因素在里面。[JSMin](http://crockford.com/javascript/jsmin), [YUI Compressor](http://yui.github.io/yuicompressor/), [Closure Compiler](https://developers.google.com/closure/compiler/), [UglifyJS](http://lisperator.net/uglifyjs/) 等 js 文件压缩合并工具陆陆续续诞生了。压缩工具是有了，但我们得要执行它，最简单的办法呢，就是 windows 上搞个 bat 脚本，mac/linux 上搞个 bash 脚本，哪几个文件要合并在一块的，哪几个要压缩的，发布的时候运行一下脚本，生成压缩后的文件。
+随着 js 能做的事情越来越多，引用越来越多，文件越来越大，加上当时大约只有 2Mbps 左右的网速，下载速度还不如 3G 网络，对 js 文件的压缩和合并的需求越来越强烈，当然这里面也有把代码混淆了不容易被盗用等其他因素在里面。[JSMin](http://crockford.com/javascript/jsmin)， [YUI Compressor](http://yui.github.io/yuicompressor/)， [Closure Compiler](https://developers.google.com/closure/compiler/)， [UglifyJS](http://lisperator.net/uglifyjs/) 等 js 文件压缩合并工具陆陆续续诞生了。压缩工具是有了，但我们得要执行它，最简单的办法呢，就是 windows 上搞个 bat 脚本，mac/linux 上搞个 bash 脚本，哪几个文件要合并在一块的，哪几个要压缩的，发布的时候运行一下脚本，生成压缩后的文件。
 
 基于合并压缩技术，项目越做越大，问题也越来越多，大概就是以下这些问题：
 * 库和插件为了要给他人调用，肯定要找个地方注册，一般就是在 window 下申明一个全局的函数或对象。难保哪天用的两个库在全局用同样的名字，那就冲突了。
@@ -90,15 +90,15 @@ define(['./d'], function(d) {
 
 以上是 AMD 规范的基本用法，更详细的就不多说了（反正也淘汰了～), 有兴趣的可以看 [这里](http://requirejs.org/docs/api.html)。
 
-js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](http://lesscss.org/), [sass](http://sass-lang.com/), [stylus](http://stylus-lang.com/) 的 css 预处理器横空出世，说能帮我们简化 css 的写法，自动给你加 vendor prefix。html 在这期间也出现了一堆模板语言，什么 [handlebars](http://handlebarsjs.com/), [ejs](http://www.embeddedjs.com/), [jade](http://jade-lang.com/), 可以把 ajax 拿到的数据插入到模板中，然后用 innerHTML 显示到页面上。
+js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](http://lesscss.org/)， [sass](http://sass-lang.com/)， [stylus](http://stylus-lang.com/) 的 css 预处理器横空出世，说能帮我们简化 css 的写法，自动给你加 vendor prefix。html 在这期间也出现了一堆模板语言，什么 [handlebars](http://handlebarsjs.com/)， [ejs](http://www.embeddedjs.com/)， [jade](http://jade-lang.com/)， 可以把 ajax 拿到的数据插入到模板中，然后用 innerHTML 显示到页面上。
 
 托 AMD 和 CSS 预处理和模板语言的福，我们的编译脚本也洋洋洒洒写了百来行。命令行脚本有个不好的地方，就是 windows 和 mac/linux 是不通用的，如果有跨平台需求的话，windows 要装个可以执行 bash 脚本的命令行工具，比如 msys（目前最新的是 [msys2](http://msys2.github.io/)), 或者使用 php 或 python 等其他语言的脚本来编写，对于非全栈型的前端程序员来说，写 bash/php/python 还是很生涩的。因此我们需要一个简单的打包工具，可以利用各种编译工具，编译 / 压缩 js, css, html, 图片等资源。然后 [Grunt](http://gruntjs.com/) 产生了 (2012 年）, 配置文件格式是我们最爱的 js, 写法也很简单，社区有非常多的插件支持各种编译，lint, 测试工具。一年多后另一个打包工具 [gulp](http://gulpjs.com/) 诞生了，扩展性更强，采用流式处理效率更高。
 
-依托 AMD 模块化编程，SPA(Single-page application)的实现方式更为简单清晰，一个网页不再是传统的类似 word 文档的页面，而是一个完整的应用程序。SPA 应用有一个总的入口页面，我们通常把它命名为 `index.html`, `app.html`, `main.html`, 这个 html 的 `<body>` 一般是空的，或者只有总的布局（layout）, 比如下图：
+依托 AMD 模块化编程，SPA(Single-page application)的实现方式更为简单清晰，一个网页不再是传统的类似 word 文档的页面，而是一个完整的应用程序。SPA 应用有一个总的入口页面，我们通常把它命名为 `index.html`， `app.html`， `main.html`， 这个 html 的 `<body>` 一般是空的，或者只有总的布局（layout）， 比如下图：
 
 ![layout](assets/layout.png)
 
-布局会把 header, nav, footer 的内容填上，但 main 区域是个空的容器。这个作为入口的 html 最主要的工作是加载启动 SPA 的 js 文件，然后由 js 驱动，根据当前浏览器地址进行路由分发，加载对应的 AMD 模块，然后该 AMD 模块执行，渲染对应的 html 到页面指定的容器内（比如图中的 main). 在点击链接等交互时，页面不会跳转，而是由 js 路由加载对应的 AMD 模块，然后该 AMD 模块渲染对应的 html 到容器内。
+布局会把 header， nav， footer 的内容填上，但 main 区域是个空的容器。这个作为入口的 html 最主要的工作是加载启动 SPA 的 js 文件，然后由 js 驱动，根据当前浏览器地址进行路由分发，加载对应的 AMD 模块，然后该 AMD 模块执行，渲染对应的 html 到页面指定的容器内（比如图中的 main)。 在点击链接等交互时，页面不会跳转，而是由 js 路由加载对应的 AMD 模块，然后该 AMD 模块渲染对应的 html 到容器内。
 
 虽然 AMD 模块让 SPA 更容易地实现，但小问题还是很多的：
 * 不是所有的第三方库都是 AMD 规范的，这时候要配置 `shim`, 很麻烦。
