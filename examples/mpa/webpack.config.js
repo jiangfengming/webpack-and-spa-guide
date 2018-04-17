@@ -49,7 +49,7 @@ module.exports = {
 
   output: {
     path: resolve(__dirname, 'dist'),
-    filename: dev ? '[name].js' : '[id].[chunkhash].js',
+    filename: dev ? '[name].js' : '[chunkhash].js',
     chunkFilename: '[chunkhash].js'
   },
 
@@ -76,7 +76,7 @@ module.exports = {
 
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
+        use: [dev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
       },
 
       {

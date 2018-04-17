@@ -1374,8 +1374,7 @@ module.exports = {
   output: {
     path: resolve(__dirname, 'dist'),
     // 我们不定义publicPath, 否则访问html时需要带上publicPath前缀
-    // 这里生产环境filename不使用[name]而用[id], 避免产生冗余文件夹
-    filename: dev ? '[name].js' : '[id].[chunkhash].js',
+    filename: dev ? '[name].js' : '[chunkhash].js',
     chunkFilename: '[chunkhash].js'
   },
 
@@ -1394,8 +1393,25 @@ module.exports = {
     ]
   },
 
+  module: {
+    rules: [
+      // ...
+      {
+        test: /\.css$/,
+        use: [dev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
+      },
+      // ...
+    ]
+  },
+
   plugins: [
     // ...
+    
+    new MiniCssExtractPlugin({
+      filename: '[contenthash].css',
+      chunkFilename: '[contenthash].css'
+    }),
+
     // 必须放在html-webpack-plugin前面
     new HtmlWebpackIncludeSiblingChunksPlugin(),
 

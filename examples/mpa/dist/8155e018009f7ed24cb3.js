@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{"7OB/":function(n,o,w){},mNFP:function(n,o,w){"use strict";w.r(o);w("7OB/");var c=w("EVdn");w.n(c)()("foo")}},[["mNFP",2,0]]]);

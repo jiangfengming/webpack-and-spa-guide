@@ -1,5 +1,3 @@
-/* eslint no-console: "off" */
-
 import $ from 'jquery'
 import './style.css'
 
