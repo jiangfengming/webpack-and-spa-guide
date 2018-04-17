@@ -736,11 +736,14 @@ npm install babel-preset-stage-2 --save-dev
 {
   output: {
     /*
-    import()加载的文件会被分开打包, 我们称这个包为chunk, chunkFilename用来配置这个chunk输出的文件名.
+    代码中引用的文件(js, css, 图片等)会根据配置合并为一个或多个包, 我们称一个包为chunk,
+    每个chunk包含多个modules. 无论是否是js, webpack都将引入的文件视为一个module,
+    chunkFilename用来配置这个chunk输出的文件名.
 
     [chunkhash]: 这个chunk的hash值, 文件发生变化时该值也会变. 使用[chunkhash]作为文件名可以防止浏览器读取旧的缓存文件.
 
-    还有一个占位符[id], 编译时每个chunk会有一个id. 我们在这里不使用它, 因为这个id是个递增的数字, 引入一个新的异步加载的文件或删掉一个, 都会导致其他文件的id发生改变, 导致缓存失效.
+    还有一个占位符[id], 编译时每个chunk会有一个id.
+    我们在这里不使用它, 因为这个id是个递增的数字, 增加或减少一个chunk, 都可能导致其他chunk的id发生改变, 导致缓存失效.
     */
     chunkFilename: '[chunkhash].js',
   }
@@ -791,9 +794,12 @@ Webpack 4最大的改进便是自动拆分chunk, 如果同时满足下列条件�
     // ...
 
     /*
-    使用文件路径的hash作为moduleId
-    webpack默认使用递增的数字作为moduleId, 如果引入了一个新文件或删掉一个文件, 会导致其他的文件的moduleId也发生改变,
-    这样未发生改变的文件在打包后会生成新的[chunkhash], 导致缓存失效
+    使用文件路径的hash作为moduleId.
+    虽然我们使用[chunkhash]作为chunk的输出名, 但仍然不够.
+    因为chunk内部的每个module都有一个id, webpack默认使用递增的数字作为moduleId.
+    如果引入了一个新文件或删掉一个文件, 可能会导致其他文件的moduleId也发生改变,
+    那么受影响的module所在的chunk的[chunkhash]就会发生改变, 导致缓存失效.
+    因此使用文件路径的hash作为moduleId来避免这个问题.
     */
     new webpack.HashedModuleIdsPlugin()
   ],
@@ -1406,7 +1412,13 @@ module.exports = {
 
   plugins: [
     // ...
-    
+
+    /*
+    这里不使用[chunkhash]
+    因为从同一个chunk抽离出来的css共享同一个[chunkhash]
+    [contenthash]你可以简单理解为moduleId + content生成的hash
+    因此一个chunk中的多个module有自己的[contenthash]
+    */
     new MiniCssExtractPlugin({
       filename: '[contenthash].css',
       chunkFilename: '[contenthash].css'
