@@ -9,22 +9,23 @@ const internalIp = require('internal-ip')
 const pkgInfo = require('./package.json')
 const glob = require('glob')
 
+const dev = Boolean(process.env.WEBPACK_SERVE)
+const config = require('./config/' + (process.env.npm_config_config || 'default'))
+
 const entries = glob.sync('./src/**/index.js')
 const entry = {}
 const htmlPlugins = []
 for (const path of entries) {
+  const template = path.replace('index.js', 'index.html')
   const chunkName = path.slice('./src/pages/'.length, -'/index.js'.length)
-  entry[chunkName] = path
+  entry[chunkName] = dev ? [path, template] : path
   htmlPlugins.push(new HtmlWebpackPlugin({
-    template: path.replace('index.js', 'index.html'),
+    template,
     filename: chunkName + '.html',
     chunksSortMode: 'none',
     chunks: [chunkName]
   }))
 }
-
-const dev = Boolean(process.env.WEBPACK_SERVE)
-const config = require('./config/' + (process.env.npm_config_config || 'default'))
 
 module.exports = {
   mode: dev ? 'development' : 'production',
@@ -85,7 +86,7 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: '[name].[hash].[ext]'
+              name: '[hash].[ext]'
             }
           }
         ]
