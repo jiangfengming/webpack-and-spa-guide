@@ -2,18 +2,18 @@
 
 > webpack 更新到了 4.0，官网还没有更新文档。因此把教程更新一下，方便大家用起 webpack 4。
 
-![webpack](assets/webpack.png)
+![webpack](https://github.com/fenivana/webpack-and-spa-guide/raw/master/assets/webpack.png)
 
 
 ## 写在开头
 
 ~~先说说为什么要写这篇文章，最初的原因是组里的小朋友们看了 [webpack](https://webpack.js.org/) 文档后，表情都是这样的：摘自 webpack 一篇文档的评论区）~~
 
-![WTF](assets/wtf.jpg)
+![WTF](https://github.com/fenivana/webpack-and-spa-guide/raw/master/assets/wtf.jpg)
 
 ~~和这样的：~~
 
-![You Couldn't Handle Me](assets/couldn't-handle.jpg)
+![You Couldn't Handle Me](https://github.com/fenivana/webpack-and-spa-guide/raw/master/assets/couldn't-handle.jpg)
 
 ~~是的，即使是外国佬也在吐槽这文档不是人能看的。回想起当年自己啃 webpack 文档的血与泪的往事，觉得有必要整一个教程，可以让大家看完后愉悦地搭建起一个 webpack 打包方案的项目。~~
 
@@ -97,7 +97,7 @@ js 模块化问题基本解决了，css 和 html 也没闲着。什么 [less](ht
 
 依托 AMD 模块化编程，SPA(Single-page application) 的实现方式更为简单清晰，一个网页不再是传统的类似 word 文档的页面，而是一个完整的应用程序。SPA 应用有一个总的入口页面，我们通常把它命名为 index.html、app.html、main.html，这个 html 的 `<body>` 一般是空的，或者只有总的布局（layout），比如下图：
 
-![layout](assets/layout.png)
+![layout](https://github.com/fenivana/webpack-and-spa-guide/raw/master/assets/layout.png)
 
 布局会把 header、nav、footer 的内容填上，但 main 区域是个空的容器。这个作为入口的 html 最主要的工作是加载启动 SPA 的 js 文件，然后由 js 驱动，根据当前浏览器地址进行路由分发，加载对应的 AMD 模块，然后该 AMD 模块执行，渲染对应的 html 到页面指定的容器内（比如图中的 main）。在点击链接等交互时，页面不会跳转，而是由 js 路由加载对应的 AMD 模块，然后该 AMD 模块渲染对应的 html 到容器内。
 
@@ -133,7 +133,7 @@ webpack 是基于我大 Node.js 的打包工具，上来第一件事自然是先
 
 ### 初始化一个项目
 
-我们先随便找个地方，建一个文件夹叫 `simple`， 然后在这里面搭项目。完成品在 [examples/simple](examples/simple) 目录，大家搞的时候可以参照一下。我们先看一下目录结构：
+我们先随便找个地方，建一个文件夹叫 `simple`， 然后在这里面搭项目。完成品在 [examples/simple](https://github.com/fenivana/webpack-and-spa-guide/blob/master/examples/simple) 目录，大家搞的时候可以参照一下。我们先看一下目录结构：
 
 ```
 ├── dist                      打包输出目录，只需部署这个目录到生产环境
@@ -203,7 +203,7 @@ npm install
 
 [WebStorm](https://www.jetbrains.com/webstorm/) 需要在设置中打开 eslint 开关：
 
-![WebStorm ESLint Config](assets/webstorm-eslint-config.png)
+![WebStorm ESLint Config](https://github.com/fenivana/webpack-and-spa-guide/raw/master/assets/webstorm-eslint-config.png)
 
 
 ### 写几个页面
@@ -396,8 +396,8 @@ const dev = Boolean(process.env.WEBPACK_SERVE)
 module.exports = {
   /*
   webpack 执行模式
-  development: 开发环境，它会在配置文件中插入调试相关的选项，比如 moduleId 使用文件路径方便调试
-  production: 生产环境，webpack 会将代码做压缩等优化
+  development：开发环境，它会在配置文件中插入调试相关的选项，比如 moduleId 使用文件路径方便调试
+  production：生产环境，webpack 会将代码做压缩等优化
   */
   mode: dev ? 'development' : 'production',
 
@@ -542,7 +542,7 @@ module.exports = {
 
 因为 webpack-cli 无法正确识别 serve 选项，使用 webpack-cli 执行打包时会报错。
 因此我们在这里判断一下，仅当使用 webpack-serve 时插入 serve 选项。
-issue: https://github.com/webpack-contrib/webpack-serve/issues/19
+issue：https://github.com/webpack-contrib/webpack-serve/issues/19
 */
 if (dev) {
   module.exports.serve = {
@@ -653,7 +653,7 @@ npm run build
 * 使用 webpack 自带的 ES6 模块处理功能
 * 使用 autoprefixer 自动创建 css 的 vendor prefixes
 
-那么，让我们在上面的配置的基础上继续完善，下面的代码我们只写出改变的部分。代码在 [examples/advanced](examples/advanced) 目录。
+那么，让我们在上面的配置的基础上继续完善，下面的代码我们只写出改变的部分。代码在 [examples/advanced](https://github.com/fenivana/webpack-and-spa-guide/blob/master/examples/advanced) 目录。
 
 
 ### 设置静态资源的 url 路径前缀
@@ -1555,7 +1555,7 @@ htmlPlugins:
 ]
 ```
 
-代码在 [examples/mpa](examples/mpa) 目录。
+代码在 [examples/mpa](https://github.com/fenivana/webpack-and-spa-guide/blob/master/examples/mpa) 目录。
 
 
 ## 总结
