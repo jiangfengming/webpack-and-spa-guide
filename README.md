@@ -7,7 +7,7 @@
 
 ## 写在开头
 
-~~先说说为什么要写这篇文章，最初的原因是组里的小朋友们看了 [webpack](https://webpack.js.org/) 文档后，表情都是这样的： 摘自 webpack 一篇文档的评论区）~~
+~~先说说为什么要写这篇文章，最初的原因是组里的小朋友们看了 [webpack](https://webpack.js.org/) 文档后，表情都是这样的：摘自 webpack 一篇文档的评论区）~~
 
 ![WTF](assets/wtf.jpg)
 
@@ -28,7 +28,7 @@
 
 随后的几年，人们开始尝试在一个页面里做更多的事情。容器的显示，隐藏，切换。用 css 写的弹层，图片轮播等等。但如果一个页面内不能向服务器请求数据，能做的事情毕竟有限的，代码的量也能维持在页面交互逻辑范围内。这时候很多人开始突破一个页面能做的事情的范围，使用隐藏的 iframe 和 flash 等作为和服务器通信的桥梁，新世界的大门慢慢地被打开，在一个页面内和服务器进行数据交互，意味着以前需要跳转多个页面的事情现在可以用一个页面搞定。但由于 iframe 和 flash 技术过于 tricky 和复杂，并没能得到广泛的推广。
 
-直到 Google 推出 Gmail 的时候（2004 年），人们意识到了一个被忽略的接口，[XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), 也就是我们俗称的 AJAX, 这是一个使用方便的，兼容性良好的服务器通信接口。从此开始，我们的页面开始玩出各种花来了，前端一下子出现了各种各样的库，[Prototype](http://prototypejs.org/)，[Dojo](https://dojotoolkit.org/)，[MooTools](http://mootools.net/)， [Ext JS](https://www.sencha.com/products/extjs/)， [jQuery](https://jquery.com/)…… 我们开始往页面里插入各种库和插件，我们的 js 文件也就爆炸了。
+直到 Google 推出 Gmail 的时候（2004 年），人们意识到了一个被忽略的接口，[XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), 也就是我们俗称的 AJAX, 这是一个使用方便的，兼容性良好的服务器通信接口。从此开始，我们的页面开始玩出各种花来了，前端一下子出现了各种各样的库，[Prototype](http://prototypejs.org/)、[Dojo](https://dojotoolkit.org/)、[MooTools](http://mootools.net/)、[Ext JS](https://www.sencha.com/products/extjs/)、[jQuery](https://jquery.com/)…… 我们开始往页面里插入各种库和插件，我们的 js 文件也就爆炸了。
 
 随着 js 能做的事情越来越多，引用越来越多，文件越来越大，加上当时大约只有 2Mbps 左右的网速，下载速度还不如 3G 网络，对 js 文件的压缩和合并的需求越来越强烈，当然这里面也有把代码混淆了不容易被盗用等其他因素在里面。[JSMin](http://crockford.com/javascript/jsmin)，[YUI Compressor](http://yui.github.io/yuicompressor/)，[Closure Compiler](https://developers.google.com/closure/compiler/)，[UglifyJS](http://lisperator.net/uglifyjs/) 等 js 文件压缩合并工具陆陆续续诞生了。压缩工具是有了，但我们得要执行它，最简单的办法呢，就是 windows 上搞个 bat 脚本，mac / linux 上搞个 bash 脚本，哪几个文件要合并在一块的，哪几个要压缩的，发布的时候运行一下脚本，生成压缩后的文件。
 
