@@ -14,7 +14,7 @@ module.exports = {
   mode: dev ? 'development' : 'production',
   devtool: dev ? 'cheap-module-eval-source-map' : 'hidden-source-map',
 
-  entry: './src/index',
+  entry: './src/index.js',
 
   optimization: {
     runtimeChunk: true,
@@ -25,7 +25,7 @@ module.exports = {
 
   output: {
     path: resolve(__dirname, 'dist'),
-    filename: dev ? '[name].js' : '[name].[chunkhash].js',
+    filename: dev ? '[name].js' : '[chunkhash].js',
     chunkFilename: '[chunkhash].js',
     publicPath: config.publicPath
   },
@@ -62,7 +62,7 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: '[name].[hash].[ext]'
+              name: '[hash].[ext]'
             }
           }
         ]
