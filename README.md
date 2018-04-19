@@ -428,8 +428,8 @@ module.exports = {
     rules: [
       {
         /*
-        使用 babel 编译 ES6/ES7/ES8 为 ES5 代码
-        使用正则表达式匹配后缀名为。js 的文件
+        使用 babel 编译 ES6 / ES7 / ES8 为 ES5 代码
+        使用正则表达式匹配后缀名为 .js 的文件
         */
         test: /\.js$/,
 
@@ -446,7 +446,7 @@ module.exports = {
       },
 
       {
-        // 匹配。html 文件
+        // 匹配 html 文件
         test: /\.html$/,
         /*
         使用 html-loader, 将 html 内容存为 js 字符串，比如当遇到
@@ -457,7 +457,7 @@ module.exports = {
       },
 
       {
-        // 匹配。css 文件
+        // 匹配 css 文件
         test: /\.css$/,
 
         /*
@@ -700,7 +700,7 @@ if (dev) {
 webpack 可以使用异步加载文件的方式引用模块，我们使用 [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)/
 [await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) 和 [dynamic import](https://github.com/tc39/proposal-dynamic-import) 来实现：
 
-`src/router.js`:
+src/router.js:
 
 ```js
 // 将 async/await 转换成 ES5 代码后需要这个运行时库来支持
@@ -878,6 +878,7 @@ entry 引用文件的规则和 `import` 是一样的，会寻找 `node_modules` 
   }
 }
 ```
+
 webpack 会给这个 entry 指定名字为 `main`。
 
 看到这应该知道 `[name]` 的意思了吧？它就是 entry 的名字。
@@ -1016,7 +1017,7 @@ module.exports.serve = {
 
 我们在根目录建立一个文件夹 `config`，里面创建 3 个配置文件：
 
-* `default.js`: 生产环境
+* default.js: 生产环境
 
 ```js
 module.exports = {
@@ -1024,7 +1025,7 @@ module.exports = {
 }
 ```
 
-* `dev.js`: 默认开发环境
+* dev.js: 默认开发环境
 
 ```js
 module.exports = {
@@ -1036,7 +1037,7 @@ module.exports = {
 }
 ```
 
-* `local.js`: 个人本地环境，在 dev.js 基础上修改部分参数。
+* local.js: 个人本地环境，在 dev.js 基础上修改部分参数。
 
 ```js
 const config = require('./dev')
