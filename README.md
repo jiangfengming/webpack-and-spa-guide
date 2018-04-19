@@ -1379,7 +1379,7 @@ module.exports = {
 ```
 
 
-## 使用 webpack 打包多页面应用(Multiple-Page Application)
+## 使用 webpack 打包多页面应用（Multiple-Page Application）
 
 多页面网站同样可以用 webpack 来打包，以便使用 npm 包，`import()`，`code splitting` 等好处。
 
