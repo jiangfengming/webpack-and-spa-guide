@@ -30,7 +30,7 @@
 
 直到 Google 推出 Gmail 的时候（2004 年），人们意识到了一个被忽略的接口，[XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), 也就是我们俗称的 AJAX, 这是一个使用方便的，兼容性良好的服务器通信接口。从此开始，我们的页面开始玩出各种花来了，前端一下子出现了各种各样的库，[Prototype](http://prototypejs.org/)、[Dojo](https://dojotoolkit.org/)、[MooTools](http://mootools.net/)、[Ext JS](https://www.sencha.com/products/extjs/)、[jQuery](https://jquery.com/)…… 我们开始往页面里插入各种库和插件，我们的 js 文件也就爆炸了。
 
-随着 js 能做的事情越来越多，引用越来越多，文件越来越大，加上当时大约只有 2Mbps 左右的网速，下载速度还不如 3G 网络，对 js 文件的压缩和合并的需求越来越强烈，当然这里面也有把代码混淆了不容易被盗用等其他因素在里面。[JSMin](http://crockford.com/javascript/jsmin)，[YUI Compressor](http://yui.github.io/yuicompressor/)，[Closure Compiler](https://developers.google.com/closure/compiler/)，[UglifyJS](http://lisperator.net/uglifyjs/) 等 js 文件压缩合并工具陆陆续续诞生了。压缩工具是有了，但我们得要执行它，最简单的办法呢，就是 windows 上搞个 bat 脚本，mac / linux 上搞个 bash 脚本，哪几个文件要合并在一块的，哪几个要压缩的，发布的时候运行一下脚本，生成压缩后的文件。
+随着 js 能做的事情越来越多，引用越来越多，文件越来越大，加上当时大约只有 2Mbps 左右的网速，下载速度还不如 3G 网络，对 js 文件的压缩和合并的需求越来越强烈，当然这里面也有把代码混淆了不容易被盗用等其他因素在里面。[JSMin](http://crockford.com/javascript/jsmin)、[YUI Compressor](http://yui.github.io/yuicompressor/)、[Closure Compiler](https://developers.google.com/closure/compiler/)、[UglifyJS](http://lisperator.net/uglifyjs/) 等 js 文件压缩合并工具陆陆续续诞生了。压缩工具是有了，但我们得要执行它，最简单的办法呢，就是 windows 上搞个 bat 脚本，mac / linux 上搞个 bash 脚本，哪几个文件要合并在一块的，哪几个要压缩的，发布的时候运行一下脚本，生成压缩后的文件。
 
 基于合并压缩技术，项目越做越大，问题也越来越多，大概就是以下这些问题：
 * 库和插件为了要给他人调用，肯定要找个地方注册，一般就是在 window 下申明一个全局的函数或对象。难保哪天用的两个库在全局用同样的名字，那就冲突了。
