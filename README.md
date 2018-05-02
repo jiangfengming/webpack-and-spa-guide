@@ -711,7 +711,7 @@ class Router {
 
 这样我们就不需要在开头把所有页面文件都import进来了.
 
-因为`import()`还没有正式进入标准, 需要使用[babel-preset-stage-2](https://babeljs.io/docs/plugins/preset-stage-2/)来支持:
+webpack2就已经支持了[ES5的模块语法](https://webpack.js.org/api/module-methods/#import-)，import()自然也可以很舒服的直接使用了。webpack2.6.0 可以支持动态加载的不同的模式（"lazy","lazy-once","eager","weak"）
 
 ```sh
 npm install babel-preset-stage-2 --save-dev
