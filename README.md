@@ -735,10 +735,15 @@ class Router {
 
 这样我们就不需要在开头把所有页面文件都 import 进来了。
 
-因为 `import()` 还没有正式进入标准，需要使用 [babel-preset-stage-2](https://babeljs.io/docs/plugins/preset-stage-2/) 来支持：
+[regenerator-runtime](https://github.com/facebook/regenerator/tree/master/packages/regenerator-runtime) 是 [regenerator](https://github.com/facebook/regenerator)
+的运行时库。Babel 通过插件 [transform-regenerator](https://babeljs.io/docs/plugins/transform-regenerator) 使用 `regenerator` 将 [generator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*) 函数和 async/await
+语法转换成 ES5 语法后，需要运行时库才能正确执行。
+
+另外因为 `import()` 还没有正式进入标准，需要使用 [syntax-dynamic-import](https://babeljs.io/docs/plugins/syntax-dynamic-import/) 来解析此语法。
+我们可以安装 [babel-preset-stage-2](https://babeljs.io/docs/plugins/preset-stage-2/)，它包含了 `import()` 和其他 stage 2 的语法支持。
 
 ```sh
-npm install babel-preset-stage-2 --save-dev
+npm install regenerator-runtime babel-preset-stage-2 --save-dev
 ```
 
 `package.json` 改一下：
