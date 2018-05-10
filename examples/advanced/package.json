@@ -51,7 +51,6 @@
     ]
   },
   "eslintConfig": {
-    "parser": "babel-eslint",
     "extends": "enough",
     "env": {
       "browser": true,
