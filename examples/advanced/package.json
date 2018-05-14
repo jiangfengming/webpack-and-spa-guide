@@ -18,6 +18,7 @@
   "devDependencies": {
     "autoprefixer": "8.3.0",
     "babel-core": "6.26.0",
+    "babel-eslint": "8.2.3",
     "babel-loader": "7.1.4",
     "babel-preset-env": "1.6.1",
     "babel-preset-stage-2": "6.24.1",
@@ -36,7 +37,7 @@
     "url-loader": "1.0.1",
     "webpack": "4.6.0",
     "webpack-cli": "2.0.14",
-    "webpack-serve": "0.3.1"
+    "webpack-serve": "0.3.2"
   },
   "babel": {
     "presets": [

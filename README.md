@@ -162,7 +162,7 @@ npm init
 我们安装 [eslint](http://eslint.org/)， 用来检查语法报错，当我们书写 js 时，有错误的地方会出现提示。
 
 ```sh
-npm install eslint eslint-config-enough eslint-loader --save-dev
+npm install eslint eslint-config-enough babel-eslint eslint-loader --save-dev
 ```
 
 `npm install` 可以一条命令同时安装多个包，包之间用空格分隔。包会被安装进 `node_modules` 目录中。
@@ -192,6 +192,8 @@ npm install
 ```
 
 业界最有名的语法规范是 [airbnb](https://github.com/airbnb/javascript) 出品的，但它规定的太死板了，比如不允许使用 `for-of` 和 `for-in` 等。感兴趣的同学可以参照 [这里](https://www.npmjs.com/package/eslint-config-airbnb) 安装使用。
+
+[babel-eslint](https://github.com/babel/babel-eslint) 是 `eslint-config-enough` 依赖的语法解析库，替代 eslint 默认的解析库以支持还未标准化的语法。比如 [import()](https://github.com/tc39/proposal-dynamic-import)。
 
 [eslint-loader](https://github.com/MoOx/eslint-loader) 用于在 webpack 编译的时候检查代码，如果有错误，webpack 会报错。
 
